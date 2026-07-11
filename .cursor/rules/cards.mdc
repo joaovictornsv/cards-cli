@@ -1,0 +1,13 @@
+---
+description: Route flashcard and deck requests to the cards-cli skill
+alwaysApply: true
+---
+
+# Cards CLI
+
+For any request about flashcards, decks, study queues, or card management:
+
+1. Read `.cursor/skills/cards-cli/SKILL.md` before acting (do not explore `cmd/`, `internal/`, or `docs/COMMANDS.md` to learn usage)
+2. Run the `cards` CLI with `--json` for deck/card management — never simulate data or query SQLite directly
+3. Use `.cursor/skills/cards-cli/reference.md` for flag/JSON details; use `examples.md` for phrase → command mapping
+4. **Do not** run `cards study` on behalf of the user — study sessions are interactive and user-driven

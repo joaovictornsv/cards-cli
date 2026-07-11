@@ -1,0 +1,6 @@
+pre-commit:
+  commands:
+    go-test:
+      run: go test ./...
+    go-vet:
+      run: go vet ./...
