@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - SQLite schema (`decks`, `cards`, `queue`) with embedded migrations
 - `internal/db` package with `Open` / `OpenMemory` and idempotent migration runner (`modernc.org/sqlite`)
+- `internal/output` package with table and JSON formatters for `config` and `version`
+- `runWithRepo` helper in CLI root for future DB-backed commands
 
 ## [0.0.0] - TBD
 
