@@ -5,13 +5,19 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/joaovictornsv/cards-cli/internal/models"
 )
 
-var ErrNotFound = errors.New("deck not found")
+var ErrDeckNotFound = errors.New("deck not found")
 
-var ErrDuplicateName = errors.New("deck already exists")
+var ErrDeckDuplicateName = errors.New("deck already exists")
+
+const deckSelectBase = `
+	SELECT d.id, d.name, d.created_at, COUNT(c.id) AS card_count
+	FROM decks d
+	LEFT JOIN cards c ON c.deck_id = d.id`
 
 type rowScanner interface {
 	Scan(dest ...any) error
@@ -26,8 +32,8 @@ func (r *Repository) CreateDeck(ctx context.Context, deck models.Deck) (models.D
 	}
 
 	if _, err := r.GetDeckByName(ctx, deck.Name); err == nil {
-		return models.Deck{}, ErrDuplicateName
-	} else if !errors.Is(err, ErrNotFound) {
+		return models.Deck{}, ErrDeckDuplicateName
+	} else if !errors.Is(err, ErrDeckNotFound) {
 		return models.Deck{}, err
 	}
 
@@ -36,6 +42,9 @@ func (r *Repository) CreateDeck(ctx context.Context, deck models.Deck) (models.D
 		deck.Name, deck.CreatedAt,
 	)
 	if err != nil {
+		if isUniqueViolation(err) {
+			return models.Deck{}, ErrDeckDuplicateName
+		}
 		return models.Deck{}, fmt.Errorf("insert deck: %w", err)
 	}
 
@@ -48,16 +57,12 @@ func (r *Repository) CreateDeck(ctx context.Context, deck models.Deck) (models.D
 }
 
 func (r *Repository) GetDeckByID(ctx context.Context, id int64) (models.Deck, error) {
-	row := r.db.sql.QueryRowContext(ctx, `
-		SELECT d.id, d.name, d.created_at, COUNT(c.id) AS card_count
-		FROM decks d
-		LEFT JOIN cards c ON c.deck_id = d.id
-		WHERE d.id = ?
-		GROUP BY d.id`, id)
+	row := r.db.sql.QueryRowContext(ctx,
+		deckSelectBase+` WHERE d.id = ? GROUP BY d.id`, id)
 
 	deck, err := scanDeck(row)
 	if errors.Is(err, sql.ErrNoRows) {
-		return models.Deck{}, ErrNotFound
+		return models.Deck{}, ErrDeckNotFound
 	}
 	if err != nil {
 		return models.Deck{}, err
@@ -66,16 +71,12 @@ func (r *Repository) GetDeckByID(ctx context.Context, id int64) (models.Deck, er
 }
 
 func (r *Repository) GetDeckByName(ctx context.Context, name string) (models.Deck, error) {
-	row := r.db.sql.QueryRowContext(ctx, `
-		SELECT d.id, d.name, d.created_at, COUNT(c.id) AS card_count
-		FROM decks d
-		LEFT JOIN cards c ON c.deck_id = d.id
-		WHERE d.name = ?
-		GROUP BY d.id`, name)
+	row := r.db.sql.QueryRowContext(ctx,
+		deckSelectBase+` WHERE d.name = ? GROUP BY d.id`, name)
 
 	deck, err := scanDeck(row)
 	if errors.Is(err, sql.ErrNoRows) {
-		return models.Deck{}, ErrNotFound
+		return models.Deck{}, ErrDeckNotFound
 	}
 	if err != nil {
 		return models.Deck{}, err
@@ -84,18 +85,14 @@ func (r *Repository) GetDeckByName(ctx context.Context, name string) (models.Dec
 }
 
 func (r *Repository) ListDecks(ctx context.Context) ([]models.Deck, error) {
-	rows, err := r.db.sql.QueryContext(ctx, `
-		SELECT d.id, d.name, d.created_at, COUNT(c.id) AS card_count
-		FROM decks d
-		LEFT JOIN cards c ON c.deck_id = d.id
-		GROUP BY d.id
-		ORDER BY d.name`)
+	rows, err := r.db.sql.QueryContext(ctx,
+		deckSelectBase+` GROUP BY d.id ORDER BY d.name`)
 	if err != nil {
 		return nil, fmt.Errorf("list decks: %w", err)
 	}
 	defer rows.Close()
 
-	var decks []models.Deck
+	decks := make([]models.Deck, 0)
 	for rows.Next() {
 		deck, err := scanDeck(rows)
 		if err != nil {
@@ -109,15 +106,22 @@ func (r *Repository) ListDecks(ctx context.Context) ([]models.Deck, error) {
 	return decks, nil
 }
 
+func (r *Repository) DeleteDeckByID(ctx context.Context, id int64) error {
+	_, err := r.db.sql.ExecContext(ctx, `DELETE FROM decks WHERE id = ?`, id)
+	if err != nil {
+		return fmt.Errorf("delete deck: %w", err)
+	}
+	return nil
+}
+
 func (r *Repository) DeleteDeckByName(ctx context.Context, name string) (models.Deck, error) {
 	deck, err := r.GetDeckByName(ctx, name)
 	if err != nil {
 		return models.Deck{}, err
 	}
 
-	_, err = r.db.sql.ExecContext(ctx, `DELETE FROM decks WHERE id = ?`, deck.ID)
-	if err != nil {
-		return models.Deck{}, fmt.Errorf("delete deck: %w", err)
+	if err := r.DeleteDeckByID(ctx, deck.ID); err != nil {
+		return models.Deck{}, err
 	}
 	return deck, nil
 }
@@ -128,4 +132,8 @@ func scanDeck(row rowScanner) (models.Deck, error) {
 		return models.Deck{}, err
 	}
 	return deck, nil
+}
+
+func isUniqueViolation(err error) bool {
+	return strings.Contains(err.Error(), "UNIQUE constraint failed")
 }

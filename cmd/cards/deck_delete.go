@@ -22,7 +22,7 @@ var deckDeleteCmd = &cobra.Command{
 
 		return runWithRepo(cmd.Context(), func(ctx context.Context, repo *db.Repository) error {
 			if jsonOutput && !deckDeleteYes {
-				return fmt.Errorf("delete requires --yes when using --json")
+				return errDeleteRequiresYes
 			}
 
 			deck, err := repo.GetDeckByName(ctx, name)
@@ -45,12 +45,12 @@ var deckDeleteCmd = &cobra.Command{
 					return fmt.Errorf("delete cancelled")
 				}
 			}
+			// Non-TTY stdin (pipes, CI): proceed without prompt, same as books-cli.
 
-			deleted, err := repo.DeleteDeckByName(ctx, name)
-			if err != nil {
-				return handleRepoError(err)
+			if err := repo.DeleteDeckByID(ctx, deck.ID); err != nil {
+				return err
 			}
-			return formatter().PrintDeck(cmd.OutOrStdout(), deleted)
+			return formatter().PrintDeck(cmd.OutOrStdout(), deck)
 		})
 	},
 }

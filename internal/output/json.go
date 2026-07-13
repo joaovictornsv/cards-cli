@@ -43,6 +43,9 @@ type decksResponse struct {
 }
 
 func (JSONFormatter) PrintDecks(w io.Writer, decks []models.Deck) error {
+	if decks == nil {
+		decks = []models.Deck{}
+	}
 	enc := json.NewEncoder(w)
 	enc.SetIndent("", "  ")
 	return enc.Encode(decksResponse{Decks: decks})

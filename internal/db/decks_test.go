@@ -52,8 +52,8 @@ func TestRepositoryDeckCRUD(t *testing.T) {
 	}
 
 	_, err = repo.CreateDeck(ctx, models.Deck{Name: "portuguese"})
-	if !errors.Is(err, ErrDuplicateName) {
-		t.Fatalf("expected ErrDuplicateName, got %v", err)
+	if !errors.Is(err, ErrDeckDuplicateName) {
+		t.Fatalf("expected ErrDeckDuplicateName, got %v", err)
 	}
 
 	deleted, err := repo.DeleteDeckByName(ctx, "portuguese")
@@ -65,8 +65,8 @@ func TestRepositoryDeckCRUD(t *testing.T) {
 	}
 
 	_, err = repo.GetDeckByName(ctx, "portuguese")
-	if !errors.Is(err, ErrNotFound) {
-		t.Fatalf("expected ErrNotFound, got %v", err)
+	if !errors.Is(err, ErrDeckNotFound) {
+		t.Fatalf("expected ErrDeckNotFound, got %v", err)
 	}
 }
 
@@ -79,8 +79,8 @@ func TestGetDeckByNameNotFound(t *testing.T) {
 
 	repo := NewRepository(database)
 	_, err = repo.GetDeckByName(context.Background(), "missing")
-	if !errors.Is(err, ErrNotFound) {
-		t.Fatalf("expected ErrNotFound, got %v", err)
+	if !errors.Is(err, ErrDeckNotFound) {
+		t.Fatalf("expected ErrDeckNotFound, got %v", err)
 	}
 }
 
@@ -93,8 +93,8 @@ func TestDeleteDeckByNameNotFound(t *testing.T) {
 
 	repo := NewRepository(database)
 	_, err = repo.DeleteDeckByName(context.Background(), "missing")
-	if !errors.Is(err, ErrNotFound) {
-		t.Fatalf("expected ErrNotFound, got %v", err)
+	if !errors.Is(err, ErrDeckNotFound) {
+		t.Fatalf("expected ErrDeckNotFound, got %v", err)
 	}
 }
 
@@ -157,5 +157,34 @@ func TestDeleteDeckCascadesCardsAndQueue(t *testing.T) {
 		if count != 0 {
 			t.Fatalf("expected 0 rows in %s after delete, got %d", table, count)
 		}
+	}
+}
+
+func TestListDecksEmpty(t *testing.T) {
+	database, err := OpenMemory()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer database.Close()
+
+	repo := NewRepository(database)
+	decks, err := repo.ListDecks(context.Background())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if decks == nil {
+		t.Fatal("expected non-nil empty slice")
+	}
+	if len(decks) != 0 {
+		t.Fatalf("expected 0 decks, got %d", len(decks))
+	}
+}
+
+func TestIsUniqueViolation(t *testing.T) {
+	if !isUniqueViolation(errors.New("UNIQUE constraint failed: decks.name")) {
+		t.Fatal("expected unique violation match")
+	}
+	if isUniqueViolation(errors.New("other error")) {
+		t.Fatal("expected no match for unrelated error")
 	}
 }

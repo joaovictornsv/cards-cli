@@ -1,10 +1,12 @@
 package models
 
 import (
-	"fmt"
+	"errors"
 	"strings"
 	"time"
 )
+
+var ErrDeckNameRequired = errors.New("deck name is required")
 
 type Deck struct {
 	ID        int64  `json:"id"`
@@ -13,9 +15,14 @@ type Deck struct {
 	CreatedAt string `json:"created_at"`
 }
 
+func (d *Deck) NormalizeForCreate() {
+	d.Name = strings.TrimSpace(d.Name)
+}
+
 func (d *Deck) ValidateForCreate() error {
-	if strings.TrimSpace(d.Name) == "" {
-		return fmt.Errorf("deck name is required")
+	d.NormalizeForCreate()
+	if d.Name == "" {
+		return ErrDeckNameRequired
 	}
 	return nil
 }

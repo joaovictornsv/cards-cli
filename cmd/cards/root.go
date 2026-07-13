@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"errors"
-	"fmt"
 
 	"github.com/joaovictornsv/cards-cli/internal/buildinfo"
 	"github.com/joaovictornsv/cards-cli/internal/config"
@@ -47,12 +46,18 @@ func formatter() output.Formatter {
 	return output.New(jsonOutput)
 }
 
+var (
+	errDeckNotFound      = errors.New("deck not found")
+	errDeckAlreadyExists = errors.New("deck already exists")
+	errDeleteRequiresYes = errors.New("delete requires --yes when using --json")
+)
+
 func handleRepoError(err error) error {
-	if errors.Is(err, db.ErrNotFound) {
-		return fmt.Errorf("deck not found")
+	if errors.Is(err, db.ErrDeckNotFound) {
+		return errDeckNotFound
 	}
-	if errors.Is(err, db.ErrDuplicateName) {
-		return fmt.Errorf("deck already exists")
+	if errors.Is(err, db.ErrDeckDuplicateName) {
+		return errDeckAlreadyExists
 	}
 	return err
 }

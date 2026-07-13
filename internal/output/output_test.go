@@ -149,4 +149,15 @@ func TestDeckFormatters(t *testing.T) {
 			t.Fatalf("expected %q in deck table, got: %s", want, buf.String())
 		}
 	}
+
+	buf.Reset()
+	if err := jsonFmt.PrintDecks(&buf, nil); err != nil {
+		t.Fatal(err)
+	}
+	if strings.Contains(buf.String(), `"decks": null`) {
+		t.Fatalf("expected empty array, got: %s", buf.String())
+	}
+	if !strings.Contains(buf.String(), `"decks": []`) {
+		t.Fatalf("expected empty decks array, got: %s", buf.String())
+	}
 }

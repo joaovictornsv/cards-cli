@@ -3,9 +3,9 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"os"
 	"path/filepath"
-	"strings"
 	"testing"
 
 	"github.com/joaovictornsv/cards-cli/internal/models"
@@ -53,6 +53,23 @@ func TestDeckCreateJSON(t *testing.T) {
 	}
 }
 
+func TestDeckCreateTrimsWhitespace(t *testing.T) {
+	_, buf := testHarness(t)
+	rootCmd.SetArgs([]string{"deck", "create", "  portuguese  ", "--json"})
+
+	if err := rootCmd.Execute(); err != nil {
+		t.Fatal(err)
+	}
+
+	var deck models.Deck
+	if err := json.Unmarshal(buf.Bytes(), &deck); err != nil {
+		t.Fatalf("decode deck JSON: %v\noutput: %s", err, buf.String())
+	}
+	if deck.Name != "portuguese" {
+		t.Fatalf("expected trimmed name portuguese, got %q", deck.Name)
+	}
+}
+
 func TestDeckCreateDuplicate(t *testing.T) {
 	_, buf := testHarness(t)
 	rootCmd.SetArgs([]string{"deck", "create", "portuguese", "--json"})
@@ -63,29 +80,25 @@ func TestDeckCreateDuplicate(t *testing.T) {
 	buf.Reset()
 	rootCmd.SetArgs([]string{"deck", "create", "portuguese", "--json"})
 	err := rootCmd.Execute()
-	if err == nil {
-		t.Fatal("expected duplicate error")
-	}
-	if !strings.Contains(err.Error(), "deck already exists") {
-		t.Fatalf("unexpected error: %v", err)
+	if !errors.Is(err, errDeckAlreadyExists) {
+		t.Fatalf("expected errDeckAlreadyExists, got %v", err)
 	}
 }
 
 func TestDeckCreateValidatesBeforeDB(t *testing.T) {
-	dbPath, buf := testHarness(t)
+	dbPath, _ := testHarness(t)
 	rootCmd.SetArgs([]string{"deck", "create", "   "})
 
 	err := rootCmd.Execute()
 	if err == nil {
 		t.Fatal("expected validation error for empty name")
 	}
-	if !strings.Contains(err.Error(), "deck name is required") {
+	if !errors.Is(err, models.ErrDeckNameRequired) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 	if _, statErr := os.Stat(dbPath); statErr == nil {
 		t.Fatal("expected database not to be created when validation fails early")
 	}
-	_ = buf
 }
 
 func TestDeckListJSON(t *testing.T) {
@@ -118,16 +131,36 @@ func TestDeckListJSON(t *testing.T) {
 	}
 }
 
+func TestDeckListEmptyJSON(t *testing.T) {
+	_, buf := testHarness(t)
+	rootCmd.SetArgs([]string{"deck", "list", "--json"})
+	if err := rootCmd.Execute(); err != nil {
+		t.Fatal(err)
+	}
+
+	raw := buf.String()
+	if bytes.Contains(buf.Bytes(), []byte(`"decks": null`)) {
+		t.Fatalf("expected empty array, got: %s", raw)
+	}
+
+	var resp struct {
+		Decks []models.Deck `json:"decks"`
+	}
+	if err := json.Unmarshal(buf.Bytes(), &resp); err != nil {
+		t.Fatalf("decode list JSON: %v\noutput: %s", err, raw)
+	}
+	if len(resp.Decks) != 0 {
+		t.Fatalf("expected 0 decks, got %d", len(resp.Decks))
+	}
+}
+
 func TestDeckDeleteNotFound(t *testing.T) {
 	_, _ = testHarness(t)
 	rootCmd.SetArgs([]string{"deck", "delete", "missing", "--json", "--yes"})
 
 	err := rootCmd.Execute()
-	if err == nil {
-		t.Fatal("expected not found error")
-	}
-	if !strings.Contains(err.Error(), "deck not found") {
-		t.Fatalf("unexpected error: %v", err)
+	if !errors.Is(err, errDeckNotFound) {
+		t.Fatalf("expected errDeckNotFound, got %v", err)
 	}
 }
 
@@ -141,11 +174,8 @@ func TestDeckDeleteRequiresYesWithJSON(t *testing.T) {
 	buf.Reset()
 	rootCmd.SetArgs([]string{"deck", "delete", "portuguese", "--json"})
 	err := rootCmd.Execute()
-	if err == nil {
-		t.Fatal("expected error when --json without --yes")
-	}
-	if !strings.Contains(err.Error(), "requires --yes") {
-		t.Fatalf("unexpected error: %v", err)
+	if !errors.Is(err, errDeleteRequiresYes) {
+		t.Fatalf("expected errDeleteRequiresYes, got %v", err)
 	}
 
 	buf.Reset()
