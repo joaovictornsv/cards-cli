@@ -45,6 +45,7 @@ Agents do not run study sessions. Documented here for context when inspecting qu
 | `edit <deck> <id>` | Available |
 | `delete <deck> <id>` | Available |
 | `queue <deck>` | Available |
+| `study <deck>` | Available (user-run only; agents must not invoke) |
 | `stats <deck>` | Planned (v1) |
 | `config` | Available |
 | `version` | Available |

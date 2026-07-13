@@ -169,12 +169,12 @@ Run an **interactive** study session. One card at a time: show front → reveal 
 
 **Primary user:** human in the terminal (not AI agents).
 
-**Status:** Not yet implemented.
+**Status:** Available (core). `--limit`, `--json`, and edge-case handling coming in a follow-up.
 
 | Flag | Default | Description |
 | --- | --- | --- |
-| `--limit` | from config (`batch_size`, default 4) | Batch size for this session |
-| `--json` | off | Machine-readable session log (secondary to interactive UX) |
+| `--limit` | from config (`batch_size`, default 4) | Batch size for this session *(not yet implemented)* |
+| `--json` | off | Machine-readable session log *(not yet implemented)* |
 
 **Grading → queue re-insert:**
 

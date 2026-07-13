@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `cards study` interactive study session (batch pull, reveal/grade UX, per-card queue persistence)
+- `internal/study` package with testable session engine and terminal input handling
+- `ListQueueCardIDsByDeck` and `ReplaceDeckQueue` repository methods for study queue updates
 - `cards queue` command with `--json` output for inspecting deck queue order
 - `ListQueueByDeck` repository method and `QueueEntry` model
 - Queue formatters in `internal/output` (table and JSON)
