@@ -26,11 +26,17 @@ func testHarness(t *testing.T) (string, *bytes.Buffer) {
 	return dbPath, &buf
 }
 
-func resetDeckCommandFlags(t *testing.T) {
+func resetCommandFlags(t *testing.T) {
 	t.Helper()
 	jsonOutput = false
 	deckDeleteYes = false
+	addFront = ""
+	addBack = ""
 	rootCmd.SetArgs(nil)
+}
+
+func resetDeckCommandFlags(t *testing.T) {
+	resetCommandFlags(t)
 }
 
 func TestDeckCreateJSON(t *testing.T) {

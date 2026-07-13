@@ -15,8 +15,8 @@ cards study portuguese   # interactive — run yourself in the terminal
 | `deck create` | Create a new deck | Available |
 | `deck list` | List decks with card counts | Available |
 | `deck delete` | Delete a deck and its cards | Available |
-| `add` | Add a card to a deck | Planned (v1) |
-| `list` | List cards in a deck (metadata) | Planned (v1) |
+| `add` | Add a card to a deck | Available |
+| `list` | List cards in a deck (metadata) | Available |
 | `show` | Show one card | Planned (v1) |
 | `edit` | Edit card front/back | Planned (v1) |
 | `delete` | Remove a card from deck and queue | Planned (v1) |

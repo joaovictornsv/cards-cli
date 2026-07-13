@@ -39,8 +39,8 @@ Agents do not run study sessions. Documented here for context when inspecting qu
 | `deck create <name>` | Available |
 | `deck list` | Available |
 | `deck delete <name>` | Available |
-| `add <deck> --front --back` | Planned (v1) |
-| `list <deck>` | Planned (v1) |
+| `add <deck> --front --back` | Available |
+| `list <deck>` | Available |
 | `show <deck> <id>` | Planned (v1) |
 | `edit <deck> <id>` | Planned (v1) |
 | `delete <deck> <id>` | Planned (v1) |
@@ -85,7 +85,20 @@ Agents do not run study sessions. Documented here for context when inspecting qu
 }
 ```
 
-**Card list** (planned):
+**Card add** (`cards add <deck> --front "..." --back "..." --json`):
+
+```json
+{
+  "id": 1,
+  "deck_id": 1,
+  "front": "What is saudade?",
+  "back": "A deep emotional state of longing.",
+  "created_at": "2026-07-09T12:00:00Z",
+  "updated_at": "2026-07-09T12:00:00Z"
+}
+```
+
+**Card list** (`cards list <deck> --json`):
 
 ```json
 {

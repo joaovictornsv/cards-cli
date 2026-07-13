@@ -1,0 +1,154 @@
+package db
+
+import (
+	"context"
+	"database/sql"
+	"errors"
+	"fmt"
+
+	"github.com/joaovictornsv/cards-cli/internal/models"
+)
+
+var ErrCardNotFound = errors.New("card not found")
+
+const cardSelectBase = `
+	SELECT id, deck_id, front, back, created_at, updated_at
+	FROM cards`
+
+func (r *Repository) CreateCard(ctx context.Context, deckName string, card models.Card) (models.Card, error) {
+	if err := card.ValidateForCreate(); err != nil {
+		return models.Card{}, err
+	}
+
+	deck, err := r.GetDeckByName(ctx, deckName)
+	if err != nil {
+		return models.Card{}, err
+	}
+
+	now := models.NowTimestamp()
+	if card.CreatedAt == "" {
+		card.CreatedAt = now
+	}
+	if card.UpdatedAt == "" {
+		card.UpdatedAt = now
+	}
+	card.DeckID = deck.ID
+
+	tx, err := r.db.sql.BeginTx(ctx, nil)
+	if err != nil {
+		return models.Card{}, fmt.Errorf("begin transaction: %w", err)
+	}
+	defer func() {
+		_ = tx.Rollback()
+	}()
+
+	res, err := tx.ExecContext(ctx, `
+		INSERT INTO cards (deck_id, front, back, created_at, updated_at)
+		VALUES (?, ?, ?, ?, ?)`,
+		card.DeckID, card.Front, card.Back, card.CreatedAt, card.UpdatedAt,
+	)
+	if err != nil {
+		return models.Card{}, fmt.Errorf("insert card: %w", err)
+	}
+
+	cardID, err := res.LastInsertId()
+	if err != nil {
+		return models.Card{}, fmt.Errorf("last insert id: %w", err)
+	}
+
+	if err := shiftQueueForFrontInsert(ctx, tx, deck.ID); err != nil {
+		return models.Card{}, err
+	}
+
+	if _, err := tx.ExecContext(ctx, `
+		INSERT INTO queue (deck_id, position, card_id)
+		VALUES (?, 0, ?)`,
+		deck.ID, cardID,
+	); err != nil {
+		return models.Card{}, fmt.Errorf("insert queue entry: %w", err)
+	}
+
+	if err := tx.Commit(); err != nil {
+		return models.Card{}, fmt.Errorf("commit transaction: %w", err)
+	}
+
+	return r.GetCardByID(ctx, cardID)
+}
+
+func (r *Repository) ListCardsByDeck(ctx context.Context, deckName string) ([]models.CardSummary, error) {
+	deck, err := r.GetDeckByName(ctx, deckName)
+	if err != nil {
+		return nil, err
+	}
+
+	rows, err := r.db.sql.QueryContext(ctx, `
+		SELECT id, front, created_at, updated_at
+		FROM cards
+		WHERE deck_id = ?
+		ORDER BY id`,
+		deck.ID,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("list cards: %w", err)
+	}
+	defer rows.Close()
+
+	cards := make([]models.CardSummary, 0)
+	for rows.Next() {
+		var card models.CardSummary
+		if err := rows.Scan(&card.ID, &card.Front, &card.CreatedAt, &card.UpdatedAt); err != nil {
+			return nil, err
+		}
+		cards = append(cards, card)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return cards, nil
+}
+
+func (r *Repository) GetCardByID(ctx context.Context, id int64) (models.Card, error) {
+	row := r.db.sql.QueryRowContext(ctx, cardSelectBase+` WHERE id = ?`, id)
+
+	card, err := scanCard(row)
+	if errors.Is(err, sql.ErrNoRows) {
+		return models.Card{}, ErrCardNotFound
+	}
+	if err != nil {
+		return models.Card{}, err
+	}
+	return card, nil
+}
+
+// shiftQueueForFrontInsert moves existing queue entries back by one position so
+// position 0 is free. Uses temporary negative positions to avoid primary-key
+// collisions on (deck_id, position).
+func shiftQueueForFrontInsert(ctx context.Context, tx *sql.Tx, deckID int64) error {
+	if _, err := tx.ExecContext(ctx, `
+		UPDATE queue SET position = -(position + 1)
+		WHERE deck_id = ?`,
+		deckID,
+	); err != nil {
+		return fmt.Errorf("shift queue positions: %w", err)
+	}
+
+	if _, err := tx.ExecContext(ctx, `
+		UPDATE queue SET position = -position
+		WHERE deck_id = ?`,
+		deckID,
+	); err != nil {
+		return fmt.Errorf("normalize queue positions: %w", err)
+	}
+	return nil
+}
+
+func scanCard(row rowScanner) (models.Card, error) {
+	var card models.Card
+	if err := row.Scan(
+		&card.ID, &card.DeckID, &card.Front, &card.Back,
+		&card.CreatedAt, &card.UpdatedAt,
+	); err != nil {
+		return models.Card{}, err
+	}
+	return card, nil
+}

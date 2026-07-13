@@ -50,3 +50,28 @@ func (JSONFormatter) PrintDecks(w io.Writer, decks []models.Deck) error {
 	enc.SetIndent("", "  ")
 	return enc.Encode(decksResponse{Decks: decks})
 }
+
+func (JSONFormatter) PrintCard(w io.Writer, card models.Card) error {
+	enc := json.NewEncoder(w)
+	enc.SetIndent("", "  ")
+	return enc.Encode(card)
+}
+
+type cardsResponse struct {
+	Deck  string               `json:"deck"`
+	Cards []models.CardSummary `json:"cards"`
+	Total int                  `json:"total"`
+}
+
+func (JSONFormatter) PrintCards(w io.Writer, deckName string, cards []models.CardSummary) error {
+	if cards == nil {
+		cards = []models.CardSummary{}
+	}
+	enc := json.NewEncoder(w)
+	enc.SetIndent("", "  ")
+	return enc.Encode(cardsResponse{
+		Deck:  deckName,
+		Cards: cards,
+		Total: len(cards),
+	})
+}
