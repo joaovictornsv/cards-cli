@@ -193,3 +193,296 @@ func TestListCardsByDeckNotFound(t *testing.T) {
 		t.Fatalf("expected ErrDeckNotFound, got %v", err)
 	}
 }
+
+func setupDeckWithCards(t *testing.T, repo *Repository, ctx context.Context) (deck models.Deck, cards []models.Card) {
+	t.Helper()
+	deck, err := repo.CreateDeck(ctx, models.Deck{Name: "portuguese"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, c := range []struct{ front, back string }{
+		{"first", "first back"},
+		{"second", "second back"},
+		{"third", "third back"},
+	} {
+		card, err := repo.CreateCard(ctx, "portuguese", models.Card{Front: c.front, Back: c.back})
+		if err != nil {
+			t.Fatal(err)
+		}
+		cards = append(cards, card)
+	}
+	return deck, cards
+}
+
+func TestGetCardByDeckAndID(t *testing.T) {
+	database, err := OpenMemory()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer database.Close()
+
+	repo := NewRepository(database)
+	ctx := context.Background()
+	_, cards := setupDeckWithCards(t, repo, ctx)
+
+	got, err := repo.GetCardByDeckAndID(ctx, "portuguese", cards[1].ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got.Front != "second" {
+		t.Fatalf("expected front second, got %q", got.Front)
+	}
+	if got.Back != "second back" {
+		t.Fatalf("expected back second back, got %q", got.Back)
+	}
+}
+
+func TestGetCardByDeckAndIDDeckNotFound(t *testing.T) {
+	database, err := OpenMemory()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer database.Close()
+
+	repo := NewRepository(database)
+	_, err = repo.GetCardByDeckAndID(context.Background(), "missing", 1)
+	if !errors.Is(err, ErrDeckNotFound) {
+		t.Fatalf("expected ErrDeckNotFound, got %v", err)
+	}
+}
+
+func TestGetCardByDeckAndIDCardNotFound(t *testing.T) {
+	database, err := OpenMemory()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer database.Close()
+
+	repo := NewRepository(database)
+	ctx := context.Background()
+	setupDeckWithCards(t, repo, ctx)
+
+	_, err = repo.GetCardByDeckAndID(ctx, "portuguese", 9999)
+	if !errors.Is(err, ErrCardNotFound) {
+		t.Fatalf("expected ErrCardNotFound, got %v", err)
+	}
+}
+
+func TestGetCardByDeckAndIDWrongDeck(t *testing.T) {
+	database, err := OpenMemory()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer database.Close()
+
+	repo := NewRepository(database)
+	ctx := context.Background()
+	_, cards := setupDeckWithCards(t, repo, ctx)
+
+	if _, err := repo.CreateDeck(ctx, models.Deck{Name: "spanish"}); err != nil {
+		t.Fatal(err)
+	}
+
+	_, err = repo.GetCardByDeckAndID(ctx, "spanish", cards[0].ID)
+	if !errors.Is(err, ErrCardNotFound) {
+		t.Fatalf("expected ErrCardNotFound, got %v", err)
+	}
+}
+
+func TestUpdateCardFrontOnly(t *testing.T) {
+	database, err := OpenMemory()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer database.Close()
+
+	repo := NewRepository(database)
+	ctx := context.Background()
+	_, cards := setupDeckWithCards(t, repo, ctx)
+
+	front := "updated second"
+	updated, err := repo.UpdateCard(ctx, "portuguese", cards[1].ID, &front, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if updated.Front != "updated second" {
+		t.Fatalf("expected updated front, got %q", updated.Front)
+	}
+	if updated.Back != "second back" {
+		t.Fatalf("expected back unchanged, got %q", updated.Back)
+	}
+
+	reloaded, err := repo.GetCardByDeckAndID(ctx, "portuguese", cards[1].ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if reloaded.Front != "updated second" {
+		t.Fatalf("expected persisted front update, got %q", reloaded.Front)
+	}
+}
+
+func TestUpdateCardBackOnly(t *testing.T) {
+	database, err := OpenMemory()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer database.Close()
+
+	repo := NewRepository(database)
+	ctx := context.Background()
+	_, cards := setupDeckWithCards(t, repo, ctx)
+
+	back := "updated back"
+	updated, err := repo.UpdateCard(ctx, "portuguese", cards[0].ID, nil, &back)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if updated.Back != "updated back" {
+		t.Fatalf("expected updated back, got %q", updated.Back)
+	}
+}
+
+func TestUpdateCardBoth(t *testing.T) {
+	database, err := OpenMemory()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer database.Close()
+
+	repo := NewRepository(database)
+	ctx := context.Background()
+	_, cards := setupDeckWithCards(t, repo, ctx)
+
+	front := "new front"
+	back := "new back"
+	updated, err := repo.UpdateCard(ctx, "portuguese", cards[2].ID, &front, &back)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if updated.Front != "new front" || updated.Back != "new back" {
+		t.Fatalf("unexpected update: %+v", updated)
+	}
+}
+
+func TestUpdateCardValidatesEmptyFront(t *testing.T) {
+	database, err := OpenMemory()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer database.Close()
+
+	repo := NewRepository(database)
+	ctx := context.Background()
+	_, cards := setupDeckWithCards(t, repo, ctx)
+
+	front := "   "
+	_, err = repo.UpdateCard(ctx, "portuguese", cards[0].ID, &front, nil)
+	if !errors.Is(err, models.ErrCardFrontRequired) {
+		t.Fatalf("expected ErrCardFrontRequired, got %v", err)
+	}
+}
+
+func TestUpdateCardDuplicateFrontAllowed(t *testing.T) {
+	database, err := OpenMemory()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer database.Close()
+
+	repo := NewRepository(database)
+	ctx := context.Background()
+	_, cards := setupDeckWithCards(t, repo, ctx)
+
+	front := "first"
+	updated, err := repo.UpdateCard(ctx, "portuguese", cards[1].ID, &front, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if updated.Front != "first" {
+		t.Fatalf("expected duplicate front allowed, got %q", updated.Front)
+	}
+}
+
+func TestDeleteCardRemovesFromQueue(t *testing.T) {
+	database, err := OpenMemory()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer database.Close()
+
+	repo := NewRepository(database)
+	ctx := context.Background()
+	deck, cards := setupDeckWithCards(t, repo, ctx)
+
+	// Queue order after inserts: third(0), second(1), first(2)
+	deleted, err := repo.DeleteCard(ctx, "portuguese", cards[1].ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if deleted.Front != "second" {
+		t.Fatalf("expected deleted card second, got %q", deleted.Front)
+	}
+
+	var count int
+	if err := database.SQL().QueryRowContext(ctx, `SELECT COUNT(*) FROM cards WHERE id = ?`, cards[1].ID).Scan(&count); err != nil {
+		t.Fatal(err)
+	}
+	if count != 0 {
+		t.Fatalf("expected card removed, got count %d", count)
+	}
+
+	rows, err := database.SQL().QueryContext(ctx, `
+		SELECT q.position, c.front
+		FROM queue q
+		JOIN cards c ON c.id = q.card_id
+		WHERE q.deck_id = ?
+		ORDER BY q.position`,
+		deck.ID,
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer rows.Close()
+
+	type entry struct {
+		pos   int
+		front string
+	}
+	var queue []entry
+	for rows.Next() {
+		var e entry
+		if err := rows.Scan(&e.pos, &e.front); err != nil {
+			t.Fatal(err)
+		}
+		queue = append(queue, e)
+	}
+	if err := rows.Err(); err != nil {
+		t.Fatal(err)
+	}
+	if len(queue) != 2 {
+		t.Fatalf("expected 2 queue entries, got %d", len(queue))
+	}
+	if queue[0].pos != 0 || queue[0].front != "third" {
+		t.Fatalf("expected third at position 0, got %+v", queue[0])
+	}
+	if queue[1].pos != 1 || queue[1].front != "first" {
+		t.Fatalf("expected first at position 1, got %+v", queue[1])
+	}
+}
+
+func TestDeleteCardNotFound(t *testing.T) {
+	database, err := OpenMemory()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer database.Close()
+
+	repo := NewRepository(database)
+	ctx := context.Background()
+	setupDeckWithCards(t, repo, ctx)
+
+	_, err = repo.DeleteCard(ctx, "portuguese", 9999)
+	if !errors.Is(err, ErrCardNotFound) {
+		t.Fatalf("expected ErrCardNotFound, got %v", err)
+	}
+}

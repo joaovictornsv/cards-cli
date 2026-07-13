@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"errors"
+	"strconv"
 
 	"github.com/joaovictornsv/cards-cli/internal/buildinfo"
 	"github.com/joaovictornsv/cards-cli/internal/config"
@@ -50,7 +51,17 @@ var (
 	errDeckNotFound      = errors.New("deck not found")
 	errDeckAlreadyExists = errors.New("deck already exists")
 	errDeleteRequiresYes = errors.New("delete requires --yes when using --json")
+	errCardNotFound      = errors.New("card not found")
+	errInvalidCardID     = errors.New("invalid card id")
 )
+
+func parseCardID(s string) (int64, error) {
+	id, err := strconv.ParseInt(s, 10, 64)
+	if err != nil || id <= 0 {
+		return 0, errInvalidCardID
+	}
+	return id, nil
+}
 
 func handleRepoError(err error) error {
 	if errors.Is(err, db.ErrDeckNotFound) {
@@ -58,6 +69,9 @@ func handleRepoError(err error) error {
 	}
 	if errors.Is(err, db.ErrDeckDuplicateName) {
 		return errDeckAlreadyExists
+	}
+	if errors.Is(err, db.ErrCardNotFound) {
+		return errCardNotFound
 	}
 	return err
 }

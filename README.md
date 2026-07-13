@@ -17,9 +17,9 @@ cards study portuguese   # interactive — run yourself in the terminal
 | `deck delete` | Delete a deck and its cards | Available |
 | `add` | Add a card to a deck | Available |
 | `list` | List cards in a deck (metadata) | Available |
-| `show` | Show one card | Planned (v1) |
-| `edit` | Edit card front/back | Planned (v1) |
-| `delete` | Remove a card from deck and queue | Planned (v1) |
+| `show` | Show one card | Available |
+| `edit` | Edit card front/back | Available |
+| `delete` | Remove a card from deck and queue | Available |
 | `queue` | Show current queue order | Planned (v1) |
 | `study` | Interactive study session | Planned (v1) — **user-run only** |
 | `stats` | Deck stats and session nudge | Planned (v1) |

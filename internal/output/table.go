@@ -56,12 +56,11 @@ func printDecksTable(w io.Writer, decks []models.Deck) error {
 }
 
 func (TableFormatter) PrintCard(w io.Writer, card models.Card) error {
-	return printCardsTable(w, []models.CardSummary{{
-		ID:        card.ID,
-		Front:     card.Front,
-		CreatedAt: card.CreatedAt,
-		UpdatedAt: card.UpdatedAt,
-	}})
+	_, err := fmt.Fprintf(w,
+		"id: %d\nfront: %s\nback: %s\ncreated_at: %s\nupdated_at: %s\n",
+		card.ID, card.Front, card.Back, card.CreatedAt, card.UpdatedAt,
+	)
+	return err
 }
 
 func (TableFormatter) PrintCards(w io.Writer, deckName string, cards []models.CardSummary) error {

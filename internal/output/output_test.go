@@ -232,4 +232,20 @@ func TestCardFormatters(t *testing.T) {
 			t.Fatalf("expected %q in cards table, got: %s", want, buf.String())
 		}
 	}
+
+	buf.Reset()
+	if err := table.PrintCard(&buf, card); err != nil {
+		t.Fatal(err)
+	}
+	for _, want := range []string{
+		"id: 1",
+		"front: What is saudade?",
+		"back: A deep emotional state of longing.",
+		"created_at: 2026-07-09T12:00:00Z",
+		"updated_at: 2026-07-09T12:00:00Z",
+	} {
+		if !strings.Contains(buf.String(), want) {
+			t.Fatalf("expected %q in card table, got: %s", want, buf.String())
+		}
+	}
 }
