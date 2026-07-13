@@ -44,7 +44,7 @@ Agents do not run study sessions. Documented here for context when inspecting qu
 | `show <deck> <id>` | Available |
 | `edit <deck> <id>` | Available |
 | `delete <deck> <id>` | Available |
-| `queue <deck>` | Planned (v1) |
+| `queue <deck>` | Available |
 | `stats <deck>` | Planned (v1) |
 | `config` | Available |
 | `version` | Available |
@@ -110,7 +110,7 @@ Agents do not run study sessions. Documented here for context when inspecting qu
 }
 ```
 
-**Queue** (planned):
+**Queue** (`cards queue <deck> --json`):
 
 ```json
 {

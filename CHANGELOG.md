@@ -9,7 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- `internal/queue` package with pure re-insert algorithm (`again`/`hard`/`easy` grading, batch pull, insert)
+- `cards queue` command with `--json` output for inspecting deck queue order
+- `ListQueueByDeck` repository method and `QueueEntry` model
+- Queue formatters in `internal/output` (table and JSON)
 - `cards show`, `cards edit`, and `cards delete` commands with `--json` output
 - Card repository methods `GetCardByDeckAndID`, `UpdateCard`, and `DeleteCard` (with queue compaction on delete)
 - `ValidateForUpdate` partial-update validation in `internal/models`

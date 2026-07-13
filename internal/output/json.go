@@ -75,3 +75,20 @@ func (JSONFormatter) PrintCards(w io.Writer, deckName string, cards []models.Car
 		Total: len(cards),
 	})
 }
+
+type queueResponse struct {
+	Deck  string              `json:"deck"`
+	Queue []models.QueueEntry `json:"queue"`
+}
+
+func (JSONFormatter) PrintQueue(w io.Writer, deckName string, entries []models.QueueEntry) error {
+	if entries == nil {
+		entries = []models.QueueEntry{}
+	}
+	enc := json.NewEncoder(w)
+	enc.SetIndent("", "  ")
+	return enc.Encode(queueResponse{
+		Deck:  deckName,
+		Queue: entries,
+	})
+}
