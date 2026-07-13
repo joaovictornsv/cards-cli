@@ -28,6 +28,11 @@ func Open(path string) (*DB, error) {
 		return nil, fmt.Errorf("ping database: %w", err)
 	}
 
+	if err := enableForeignKeys(sqlDB); err != nil {
+		_ = sqlDB.Close()
+		return nil, err
+	}
+
 	if err := migrate(sqlDB); err != nil {
 		_ = sqlDB.Close()
 		return nil, err
@@ -42,12 +47,24 @@ func OpenMemory() (*DB, error) {
 		return nil, fmt.Errorf("open in-memory database: %w", err)
 	}
 
+	if err := enableForeignKeys(sqlDB); err != nil {
+		_ = sqlDB.Close()
+		return nil, err
+	}
+
 	if err := migrate(sqlDB); err != nil {
 		_ = sqlDB.Close()
 		return nil, err
 	}
 
 	return &DB{sql: sqlDB}, nil
+}
+
+func enableForeignKeys(sqlDB *sql.DB) error {
+	if _, err := sqlDB.Exec(`PRAGMA foreign_keys = ON`); err != nil {
+		return fmt.Errorf("enable foreign keys: %w", err)
+	}
+	return nil
 }
 
 func (d *DB) Close() error {

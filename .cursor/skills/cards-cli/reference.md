@@ -36,9 +36,9 @@ Agents do not run study sessions. Documented here for context when inspecting qu
 
 | Command | Status |
 | --- | --- |
-| `deck create <name>` | Planned (v1) |
-| `deck list` | Planned (v1) |
-| `deck delete <name>` | Planned (v1) |
+| `deck create <name>` | Available |
+| `deck list` | Available |
+| `deck delete <name>` | Available |
 | `add <deck> --front --back` | Planned (v1) |
 | `list <deck>` | Planned (v1) |
 | `show <deck> <id>` | Planned (v1) |
@@ -75,7 +75,7 @@ Agents do not run study sessions. Documented here for context when inspecting qu
 }
 ```
 
-**Deck list** (planned):
+**Deck list** (`cards deck list --json`):
 
 ```json
 {

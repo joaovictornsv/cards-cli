@@ -6,6 +6,7 @@ import (
 
 	"github.com/joaovictornsv/cards-cli/internal/buildinfo"
 	"github.com/joaovictornsv/cards-cli/internal/config"
+	"github.com/joaovictornsv/cards-cli/internal/models"
 )
 
 type JSONFormatter struct{}
@@ -29,4 +30,23 @@ func (JSONFormatter) PrintVersion(w io.Writer, info buildinfo.Info) error {
 	enc := json.NewEncoder(w)
 	enc.SetIndent("", "  ")
 	return enc.Encode(info)
+}
+
+func (JSONFormatter) PrintDeck(w io.Writer, deck models.Deck) error {
+	enc := json.NewEncoder(w)
+	enc.SetIndent("", "  ")
+	return enc.Encode(deck)
+}
+
+type decksResponse struct {
+	Decks []models.Deck `json:"decks"`
+}
+
+func (JSONFormatter) PrintDecks(w io.Writer, decks []models.Deck) error {
+	if decks == nil {
+		decks = []models.Deck{}
+	}
+	enc := json.NewEncoder(w)
+	enc.SetIndent("", "  ")
+	return enc.Encode(decksResponse{Decks: decks})
 }
