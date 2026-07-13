@@ -13,6 +13,8 @@ type Formatter interface {
 	PrintVersion(w io.Writer, info buildinfo.Info) error
 	PrintDeck(w io.Writer, deck models.Deck) error
 	PrintDecks(w io.Writer, decks []models.Deck) error
+	PrintCard(w io.Writer, card models.Card) error
+	PrintCards(w io.Writer, deckName string, cards []models.CardSummary) error
 }
 
 func New(json bool) Formatter {

@@ -54,3 +54,33 @@ func printDecksTable(w io.Writer, decks []models.Deck) error {
 	}
 	return tw.Flush()
 }
+
+func (TableFormatter) PrintCard(w io.Writer, card models.Card) error {
+	return printCardsTable(w, []models.CardSummary{{
+		ID:        card.ID,
+		Front:     card.Front,
+		CreatedAt: card.CreatedAt,
+		UpdatedAt: card.UpdatedAt,
+	}})
+}
+
+func (TableFormatter) PrintCards(w io.Writer, deckName string, cards []models.CardSummary) error {
+	if _, err := fmt.Fprintf(w, "deck: %s\n", deckName); err != nil {
+		return err
+	}
+	return printCardsTable(w, cards)
+}
+
+func printCardsTable(w io.Writer, cards []models.CardSummary) error {
+	tw := tabwriter.NewWriter(w, 0, 0, 2, ' ', 0)
+	if _, err := fmt.Fprintln(tw, "ID\tFRONT\tCREATED\tUPDATED"); err != nil {
+		return err
+	}
+	for _, card := range cards {
+		if _, err := fmt.Fprintf(tw, "%d\t%s\t%s\t%s\n",
+			card.ID, card.Front, card.CreatedAt, card.UpdatedAt); err != nil {
+			return err
+		}
+	}
+	return tw.Flush()
+}

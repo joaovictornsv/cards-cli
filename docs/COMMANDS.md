@@ -69,7 +69,7 @@ cards deck delete portuguese --json --yes
 
 Add a card to a deck. New cards are inserted at the **front** of the queue.
 
-**Status:** Not yet implemented.
+**Status:** Implemented.
 
 | Flag | Required | Description |
 | --- | --- | --- |
@@ -87,9 +87,9 @@ cards add portuguese --front "What is saudade?" --back "A deep emotional state o
 
 ## `cards list <deck>`
 
-List cards in a deck (metadata: id, front preview, timestamps). Does not walk the full queue order.
+List cards in a deck (metadata: id, front text, timestamps). Does not walk the full queue order.
 
-**Status:** Not yet implemented.
+**Status:** Implemented.
 
 **Example:**
 

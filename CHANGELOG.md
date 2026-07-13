@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `cards add` and `cards list` commands with `--json` output
+- `Card` and `CardSummary` types with validation in `internal/models`
+- Card repository methods in `internal/db` (`CreateCard`, `ListCardsByDeck`, `GetCardByID`)
+- Card formatters in `internal/output` (table and JSON)
 - `cards deck create`, `cards deck list`, and `cards deck delete` commands with `--json` output
 - `internal/models` package with `Deck` type and validation
 - Deck repository methods in `internal/db` (`CreateDeck`, `GetDeckByName`, `ListDecks`, `DeleteDeckByName`)
