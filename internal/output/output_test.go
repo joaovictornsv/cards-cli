@@ -7,6 +7,7 @@ import (
 
 	"github.com/joaovictornsv/cards-cli/internal/buildinfo"
 	"github.com/joaovictornsv/cards-cli/internal/config"
+	"github.com/joaovictornsv/cards-cli/internal/models"
 )
 
 func TestJSONFormatter(t *testing.T) {
@@ -103,5 +104,49 @@ func TestTableFormatter(t *testing.T) {
 	}
 	if !strings.Contains(buf.String(), "0.0.0-dev (commit unknown, go1.25.0)") {
 		t.Fatalf("unexpected version table: %s", buf.String())
+	}
+}
+
+func TestDeckFormatters(t *testing.T) {
+	deck := models.Deck{
+		ID:        1,
+		Name:      "portuguese",
+		CardCount: 0,
+		CreatedAt: "2026-07-09T12:00:00Z",
+	}
+
+	var buf bytes.Buffer
+	jsonFmt := JSONFormatter{}
+	if err := jsonFmt.PrintDeck(&buf, deck); err != nil {
+		t.Fatal(err)
+	}
+	for _, want := range []string{
+		`"id": 1`,
+		`"name": "portuguese"`,
+		`"card_count": 0`,
+		`"created_at": "2026-07-09T12:00:00Z"`,
+	} {
+		if !strings.Contains(buf.String(), want) {
+			t.Fatalf("expected %q in deck json, got: %s", want, buf.String())
+		}
+	}
+
+	buf.Reset()
+	if err := jsonFmt.PrintDecks(&buf, []models.Deck{deck}); err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(buf.String(), `"decks"`) {
+		t.Fatalf("expected decks key in json, got: %s", buf.String())
+	}
+
+	buf.Reset()
+	table := TableFormatter{}
+	if err := table.PrintDecks(&buf, []models.Deck{deck}); err != nil {
+		t.Fatal(err)
+	}
+	for _, want := range []string{"ID", "NAME", "CARDS", "portuguese"} {
+		if !strings.Contains(buf.String(), want) {
+			t.Fatalf("expected %q in deck table, got: %s", want, buf.String())
+		}
 	}
 }

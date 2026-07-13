@@ -12,9 +12,9 @@ cards study portuguese   # interactive — run yourself in the terminal
 
 | Command | Description | Status |
 | --- | --- | --- |
-| `deck create` | Create a new deck | Planned (v1) |
-| `deck list` | List decks with card counts | Planned (v1) |
-| `deck delete` | Delete a deck and its cards | Planned (v1) |
+| `deck create` | Create a new deck | Available |
+| `deck list` | List decks with card counts | Available |
+| `deck delete` | Delete a deck and its cards | Available |
 | `add` | Add a card to a deck | Planned (v1) |
 | `list` | List cards in a deck (metadata) | Planned (v1) |
 | `show` | Show one card | Planned (v1) |

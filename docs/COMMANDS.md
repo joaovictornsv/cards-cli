@@ -2,7 +2,7 @@
 
 Binary: **`cards`**. Use `--json` on management commands for machine-readable output.
 
-> **Scaffold note:** Only `config` and `version` are implemented in the initial commit. Other commands below are the v1 specification — marked where not yet available.
+> **Scaffold note:** `config`, `version`, and `deck` commands are implemented. Other commands below are the v1 specification — marked where not yet available.
 
 ## Global flags
 
@@ -18,7 +18,7 @@ Binary: **`cards`**. Use `--json` on management commands for machine-readable ou
 
 Create a new deck.
 
-**Status:** Not yet implemented.
+**Status:** Implemented.
 
 | Flag | Description |
 | --- | --- |
@@ -36,7 +36,7 @@ cards deck create portuguese --json
 
 List all decks with card counts.
 
-**Status:** Not yet implemented.
+**Status:** Implemented.
 
 **Example:**
 
@@ -50,12 +50,17 @@ cards deck list --json
 
 Delete a deck and all its cards and queue entries.
 
-**Status:** Not yet implemented.
+**Status:** Implemented.
+
+| Flag | Description |
+| --- | --- |
+| `--yes`, `-y` | Confirm deletion without prompting (required with `--json`) |
+| `--json` | JSON output |
 
 **Example:**
 
 ```bash
-cards deck delete portuguese --json
+cards deck delete portuguese --json --yes
 ```
 
 ---

@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `cards deck create`, `cards deck list`, and `cards deck delete` commands with `--json` output
+- `internal/models` package with `Deck` type and validation
+- Deck repository methods in `internal/db` (`CreateDeck`, `GetDeckByName`, `ListDecks`, `DeleteDeckByName`)
+- Deck formatters in `internal/output` (table and JSON)
+- SQLite foreign key enforcement (`PRAGMA foreign_keys = ON`) for cascade deletes
 - SQLite schema (`decks`, `cards`, `queue`) with embedded migrations
 - `internal/db` package with `Open` / `OpenMemory` and idempotent migration runner (`modernc.org/sqlite`)
 - `internal/output` package with table and JSON formatters for `config` and `version`

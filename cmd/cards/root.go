@@ -2,6 +2,8 @@ package main
 
 import (
 	"context"
+	"errors"
+	"fmt"
 
 	"github.com/joaovictornsv/cards-cli/internal/buildinfo"
 	"github.com/joaovictornsv/cards-cli/internal/config"
@@ -43,6 +45,16 @@ func openRepo() (*db.Repository, func(), error) {
 
 func formatter() output.Formatter {
 	return output.New(jsonOutput)
+}
+
+func handleRepoError(err error) error {
+	if errors.Is(err, db.ErrNotFound) {
+		return fmt.Errorf("deck not found")
+	}
+	if errors.Is(err, db.ErrDuplicateName) {
+		return fmt.Errorf("deck already exists")
+	}
+	return err
 }
 
 func runWithRepo(ctx context.Context, fn func(context.Context, *db.Repository) error) error {
