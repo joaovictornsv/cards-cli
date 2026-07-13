@@ -2,7 +2,7 @@
 
 Binary: **`cards`**. Use `--json` on management commands for machine-readable output.
 
-> **Scaffold note:** `config`, `version`, and `deck` commands are implemented. Other commands below are the v1 specification — marked where not yet available.
+> **Scaffold note:** `config`, `version`, `deck`, `add`, `list`, `show`, `edit`, and `delete` commands are implemented. Other commands below are the v1 specification — marked where not yet available.
 
 ## Global flags
 
@@ -103,7 +103,7 @@ cards list portuguese --json
 
 Show one card (full front and back).
 
-**Status:** Not yet implemented.
+**Status:** Implemented.
 
 **Example:**
 
@@ -117,7 +117,7 @@ cards show portuguese 3 --json
 
 Edit a card's front and/or back.
 
-**Status:** Not yet implemented.
+**Status:** Implemented.
 
 | Flag | Description |
 | --- | --- |
@@ -139,7 +139,7 @@ cards edit portuguese 3 --front "Updated question" --json
 
 Remove a card from the deck and queue. No archive.
 
-**Status:** Not yet implemented.
+**Status:** Implemented.
 
 **Example:**
 

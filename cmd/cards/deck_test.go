@@ -9,6 +9,8 @@ import (
 	"testing"
 
 	"github.com/joaovictornsv/cards-cli/internal/models"
+	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
 )
 
 func testHarness(t *testing.T) (string, *bytes.Buffer) {
@@ -32,7 +34,17 @@ func resetCommandFlags(t *testing.T) {
 	deckDeleteYes = false
 	addFront = ""
 	addBack = ""
+	editFront = ""
+	editBack = ""
+	resetCmdFlags(editCmd)
 	rootCmd.SetArgs(nil)
+}
+
+func resetCmdFlags(cmd *cobra.Command) {
+	cmd.Flags().VisitAll(func(f *pflag.Flag) {
+		_ = f.Value.Set(f.DefValue)
+		f.Changed = false
+	})
 }
 
 func resetDeckCommandFlags(t *testing.T) {

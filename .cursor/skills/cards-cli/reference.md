@@ -41,9 +41,9 @@ Agents do not run study sessions. Documented here for context when inspecting qu
 | `deck delete <name>` | Available |
 | `add <deck> --front --back` | Available |
 | `list <deck>` | Available |
-| `show <deck> <id>` | Planned (v1) |
-| `edit <deck> <id>` | Planned (v1) |
-| `delete <deck> <id>` | Planned (v1) |
+| `show <deck> <id>` | Available |
+| `edit <deck> <id>` | Available |
+| `delete <deck> <id>` | Available |
 | `queue <deck>` | Planned (v1) |
 | `stats <deck>` | Planned (v1) |
 | `config` | Available |

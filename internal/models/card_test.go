@@ -76,3 +76,70 @@ func TestCardValidateForCreate(t *testing.T) {
 		})
 	}
 }
+
+func TestCardValidateForUpdate(t *testing.T) {
+	tests := []struct {
+		name    string
+		front   *string
+		back    *string
+		wantErr error
+	}{
+		{
+			name:  "front only",
+			front: strPtr("new front"),
+		},
+		{
+			name: "back only",
+			back: strPtr("new back"),
+		},
+		{
+			name:  "both",
+			front: strPtr("new front"),
+			back:  strPtr("new back"),
+		},
+		{
+			name:    "neither",
+			wantErr: ErrCardEditRequiresField,
+		},
+		{
+			name:    "empty front",
+			front:   strPtr(""),
+			wantErr: ErrCardFrontRequired,
+		},
+		{
+			name:    "whitespace front",
+			front:   strPtr("   "),
+			wantErr: ErrCardFrontRequired,
+		},
+		{
+			name:    "empty back",
+			back:    strPtr(""),
+			wantErr: ErrCardBackRequired,
+		},
+		{
+			name:    "whitespace back",
+			back:    strPtr("   "),
+			wantErr: ErrCardBackRequired,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var card Card
+			err := card.ValidateForUpdate(tt.front, tt.back)
+			if tt.wantErr != nil {
+				if !errors.Is(err, tt.wantErr) {
+					t.Fatalf("expected %v, got %v", tt.wantErr, err)
+				}
+				return
+			}
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+		})
+	}
+}
+
+func strPtr(s string) *string {
+	return &s
+}

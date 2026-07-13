@@ -120,6 +120,105 @@ func (r *Repository) GetCardByID(ctx context.Context, id int64) (models.Card, er
 	return card, nil
 }
 
+func (r *Repository) GetCardByDeckAndID(ctx context.Context, deckName string, cardID int64) (models.Card, error) {
+	deck, err := r.GetDeckByName(ctx, deckName)
+	if err != nil {
+		return models.Card{}, err
+	}
+
+	card, err := r.GetCardByID(ctx, cardID)
+	if err != nil {
+		return models.Card{}, err
+	}
+	if card.DeckID != deck.ID {
+		return models.Card{}, ErrCardNotFound
+	}
+	return card, nil
+}
+
+func (r *Repository) UpdateCard(ctx context.Context, deckName string, cardID int64, front, back *string) (models.Card, error) {
+	card, err := r.GetCardByDeckAndID(ctx, deckName, cardID)
+	if err != nil {
+		return models.Card{}, err
+	}
+
+	if err := card.ValidateForUpdate(front, back); err != nil {
+		return models.Card{}, err
+	}
+
+	if front != nil {
+		card.Front = *front
+	}
+	if back != nil {
+		card.Back = *back
+	}
+	card.UpdatedAt = models.NowTimestamp()
+
+	_, err = r.db.sql.ExecContext(ctx, `
+		UPDATE cards SET front = ?, back = ?, updated_at = ?
+		WHERE id = ?`,
+		card.Front, card.Back, card.UpdatedAt, card.ID,
+	)
+	if err != nil {
+		return models.Card{}, fmt.Errorf("update card: %w", err)
+	}
+
+	return card, nil
+}
+
+func (r *Repository) DeleteCard(ctx context.Context, deckName string, cardID int64) (models.Card, error) {
+	card, err := r.GetCardByDeckAndID(ctx, deckName, cardID)
+	if err != nil {
+		return models.Card{}, err
+	}
+
+	tx, err := r.db.sql.BeginTx(ctx, nil)
+	if err != nil {
+		return models.Card{}, fmt.Errorf("begin transaction: %w", err)
+	}
+	defer func() {
+		_ = tx.Rollback()
+	}()
+
+	var deletedPosition int
+	err = tx.QueryRowContext(ctx, `
+		SELECT position FROM queue WHERE deck_id = ? AND card_id = ?`,
+		card.DeckID, card.ID,
+	).Scan(&deletedPosition)
+	if errors.Is(err, sql.ErrNoRows) {
+		return models.Card{}, ErrCardNotFound
+	}
+	if err != nil {
+		return models.Card{}, fmt.Errorf("get queue position: %w", err)
+	}
+
+	if _, err := tx.ExecContext(ctx, `DELETE FROM cards WHERE id = ?`, card.ID); err != nil {
+		return models.Card{}, fmt.Errorf("delete card: %w", err)
+	}
+
+	if err := compactQueueAfterDelete(ctx, tx, card.DeckID, deletedPosition); err != nil {
+		return models.Card{}, err
+	}
+
+	if err := tx.Commit(); err != nil {
+		return models.Card{}, fmt.Errorf("commit transaction: %w", err)
+	}
+
+	return card, nil
+}
+
+// compactQueueAfterDelete renumbers queue positions after a card is removed.
+func compactQueueAfterDelete(ctx context.Context, tx *sql.Tx, deckID int64, deletedPosition int) error {
+	if _, err := tx.ExecContext(ctx, `
+		UPDATE queue SET position = position - 1
+		WHERE deck_id = ? AND position > ?`,
+		deckID, deletedPosition,
+	); err != nil {
+		return fmt.Errorf("compact queue positions: %w", err)
+	}
+	return nil
+}
+
 // shiftQueueForFrontInsert moves existing queue entries back by one position so
 // position 0 is free. Uses temporary negative positions to avoid primary-key
 // collisions on (deck_id, position).

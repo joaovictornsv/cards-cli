@@ -9,6 +9,8 @@ var ErrCardFrontRequired = errors.New("card front is required")
 
 var ErrCardBackRequired = errors.New("card back is required")
 
+var ErrCardEditRequiresField = errors.New("edit requires at least one of --front or --back")
+
 type Card struct {
 	ID        int64  `json:"id"`
 	DeckID    int64  `json:"deck_id"`
@@ -37,6 +39,29 @@ func (c *Card) ValidateForCreate() error {
 	}
 	if c.Back == "" {
 		return ErrCardBackRequired
+	}
+	return nil
+}
+
+// ValidateForUpdate trims and validates partial front/back updates.
+// At least one field must be provided; provided fields must be non-empty after trim.
+func (c *Card) ValidateForUpdate(front, back *string) error {
+	if front == nil && back == nil {
+		return ErrCardEditRequiresField
+	}
+	if front != nil {
+		trimmed := strings.TrimSpace(*front)
+		if trimmed == "" {
+			return ErrCardFrontRequired
+		}
+		*front = trimmed
+	}
+	if back != nil {
+		trimmed := strings.TrimSpace(*back)
+		if trimmed == "" {
+			return ErrCardBackRequired
+		}
+		*back = trimmed
 	}
 	return nil
 }

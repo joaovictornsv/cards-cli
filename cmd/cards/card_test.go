@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"os"
+	"strconv"
 	"testing"
 
 	"github.com/joaovictornsv/cards-cli/internal/db"
@@ -276,4 +277,204 @@ func TestListDeckNotFound(t *testing.T) {
 	if !errors.Is(err, errDeckNotFound) {
 		t.Fatalf("expected errDeckNotFound, got %v", err)
 	}
+}
+
+func addTestCard(t *testing.T, buf *bytes.Buffer) int64 {
+	t.Helper()
+	buf.Reset()
+	rootCmd.SetArgs([]string{
+		"add", "portuguese",
+		"--front", "What is saudade?",
+		"--back", "A deep emotional state of longing.",
+		"--json",
+	})
+	if err := rootCmd.Execute(); err != nil {
+		t.Fatal(err)
+	}
+
+	var card models.Card
+	if err := json.Unmarshal(buf.Bytes(), &card); err != nil {
+		t.Fatalf("decode card JSON: %v\noutput: %s", err, buf.String())
+	}
+	return card.ID
+}
+
+func TestShowJSON(t *testing.T) {
+	_, buf := testHarness(t)
+	rootCmd.SetArgs([]string{"deck", "create", "portuguese", "--json"})
+	if err := rootCmd.Execute(); err != nil {
+		t.Fatal(err)
+	}
+	cardID := addTestCard(t, buf)
+
+	buf.Reset()
+	rootCmd.SetArgs([]string{"show", "portuguese", formatInt(cardID), "--json"})
+	if err := rootCmd.Execute(); err != nil {
+		t.Fatal(err)
+	}
+
+	var card models.Card
+	if err := json.Unmarshal(buf.Bytes(), &card); err != nil {
+		t.Fatalf("decode card JSON: %v\noutput: %s", err, buf.String())
+	}
+	if card.Front != "What is saudade?" {
+		t.Fatalf("expected front, got %q", card.Front)
+	}
+	if card.Back != "A deep emotional state of longing." {
+		t.Fatalf("expected back, got %q", card.Back)
+	}
+}
+
+func TestShowDeckNotFound(t *testing.T) {
+	_, _ = testHarness(t)
+	rootCmd.SetArgs([]string{"show", "missing", "1", "--json"})
+	err := rootCmd.Execute()
+	if !errors.Is(err, errDeckNotFound) {
+		t.Fatalf("expected errDeckNotFound, got %v", err)
+	}
+}
+
+func TestShowCardNotFound(t *testing.T) {
+	_, _ = testHarness(t)
+	rootCmd.SetArgs([]string{"deck", "create", "portuguese", "--json"})
+	if err := rootCmd.Execute(); err != nil {
+		t.Fatal(err)
+	}
+
+	rootCmd.SetArgs([]string{"show", "portuguese", "9999", "--json"})
+	err := rootCmd.Execute()
+	if !errors.Is(err, errCardNotFound) {
+		t.Fatalf("expected errCardNotFound, got %v", err)
+	}
+}
+
+func TestShowInvalidID(t *testing.T) {
+	_, _ = testHarness(t)
+	rootCmd.SetArgs([]string{"deck", "create", "portuguese", "--json"})
+	if err := rootCmd.Execute(); err != nil {
+		t.Fatal(err)
+	}
+
+	rootCmd.SetArgs([]string{"show", "portuguese", "abc", "--json"})
+	err := rootCmd.Execute()
+	if !errors.Is(err, errInvalidCardID) {
+		t.Fatalf("expected errInvalidCardID, got %v", err)
+	}
+}
+
+func TestEditJSON(t *testing.T) {
+	_, buf := testHarness(t)
+	rootCmd.SetArgs([]string{"deck", "create", "portuguese", "--json"})
+	if err := rootCmd.Execute(); err != nil {
+		t.Fatal(err)
+	}
+	cardID := addTestCard(t, buf)
+
+	buf.Reset()
+	rootCmd.SetArgs([]string{
+		"edit", "portuguese", formatInt(cardID),
+		"--front", "Updated question",
+		"--json",
+	})
+	if err := rootCmd.Execute(); err != nil {
+		t.Fatal(err)
+	}
+
+	var card models.Card
+	if err := json.Unmarshal(buf.Bytes(), &card); err != nil {
+		t.Fatalf("decode card JSON: %v\noutput: %s", err, buf.String())
+	}
+	if card.Front != "Updated question" {
+		t.Fatalf("expected updated front, got %q", card.Front)
+	}
+	if card.Back != "A deep emotional state of longing." {
+		t.Fatalf("expected back unchanged, got %q", card.Back)
+	}
+}
+
+func TestEditRequiresFlag(t *testing.T) {
+	_, buf := testHarness(t)
+	rootCmd.SetArgs([]string{"deck", "create", "portuguese", "--json"})
+	if err := rootCmd.Execute(); err != nil {
+		t.Fatal(err)
+	}
+	cardID := addTestCard(t, buf)
+
+	resetCommandFlags(t)
+	rootCmd.SetArgs([]string{"edit", "portuguese", formatInt(cardID), "--json"})
+	err := rootCmd.Execute()
+	if !errors.Is(err, models.ErrCardEditRequiresField) {
+		t.Fatalf("expected ErrCardEditRequiresField, got %v", err)
+	}
+}
+
+func TestEditValidatesEmptyFront(t *testing.T) {
+	_, buf := testHarness(t)
+	rootCmd.SetArgs([]string{"deck", "create", "portuguese", "--json"})
+	if err := rootCmd.Execute(); err != nil {
+		t.Fatal(err)
+	}
+	cardID := addTestCard(t, buf)
+
+	resetCommandFlags(t)
+	rootCmd.SetArgs([]string{"edit", "portuguese", formatInt(cardID), "--front", "   "})
+	err := rootCmd.Execute()
+	if !errors.Is(err, models.ErrCardFrontRequired) {
+		t.Fatalf("expected ErrCardFrontRequired, got %v", err)
+	}
+}
+
+func TestDeleteJSON(t *testing.T) {
+	dbPath, buf := testHarness(t)
+	rootCmd.SetArgs([]string{"deck", "create", "portuguese", "--json"})
+	if err := rootCmd.Execute(); err != nil {
+		t.Fatal(err)
+	}
+	cardID := addTestCard(t, buf)
+
+	buf.Reset()
+	rootCmd.SetArgs([]string{"delete", "portuguese", formatInt(cardID), "--json"})
+	if err := rootCmd.Execute(); err != nil {
+		t.Fatal(err)
+	}
+
+	var card models.Card
+	if err := json.Unmarshal(buf.Bytes(), &card); err != nil {
+		t.Fatalf("decode card JSON: %v\noutput: %s", err, buf.String())
+	}
+	if card.Front != "What is saudade?" {
+		t.Fatalf("expected deleted card front, got %q", card.Front)
+	}
+
+	database, err := db.Open(dbPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer database.Close()
+
+	var count int
+	if err := database.SQL().QueryRow(`SELECT COUNT(*) FROM cards WHERE id = ?`, cardID).Scan(&count); err != nil {
+		t.Fatal(err)
+	}
+	if count != 0 {
+		t.Fatalf("expected card deleted, got count %d", count)
+	}
+}
+
+func TestDeleteCardNotFound(t *testing.T) {
+	_, _ = testHarness(t)
+	rootCmd.SetArgs([]string{"deck", "create", "portuguese", "--json"})
+	if err := rootCmd.Execute(); err != nil {
+		t.Fatal(err)
+	}
+
+	rootCmd.SetArgs([]string{"delete", "portuguese", "9999", "--json"})
+	err := rootCmd.Execute()
+	if !errors.Is(err, errCardNotFound) {
+		t.Fatalf("expected errCardNotFound, got %v", err)
+	}
+}
+
+func formatInt(n int64) string {
+	return strconv.FormatInt(n, 10)
 }
