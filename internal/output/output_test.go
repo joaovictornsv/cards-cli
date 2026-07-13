@@ -249,3 +249,50 @@ func TestCardFormatters(t *testing.T) {
 		}
 	}
 }
+
+func TestQueueFormatters(t *testing.T) {
+	entry := models.QueueEntry{
+		Position:     0,
+		ID:           3,
+		FrontPreview: "What is saudade?",
+	}
+
+	var buf bytes.Buffer
+	jsonFmt := JSONFormatter{}
+	if err := jsonFmt.PrintQueue(&buf, "portuguese", []models.QueueEntry{entry}); err != nil {
+		t.Fatal(err)
+	}
+	for _, want := range []string{
+		`"deck": "portuguese"`,
+		`"queue"`,
+		`"position": 0`,
+		`"id": 3`,
+		`"front_preview": "What is saudade?"`,
+	} {
+		if !strings.Contains(buf.String(), want) {
+			t.Fatalf("expected %q in queue json, got: %s", want, buf.String())
+		}
+	}
+
+	buf.Reset()
+	if err := jsonFmt.PrintQueue(&buf, "portuguese", nil); err != nil {
+		t.Fatal(err)
+	}
+	if strings.Contains(buf.String(), `"queue": null`) {
+		t.Fatalf("expected empty array, got: %s", buf.String())
+	}
+	if !strings.Contains(buf.String(), `"queue": []`) {
+		t.Fatalf("expected empty queue array, got: %s", buf.String())
+	}
+
+	buf.Reset()
+	table := TableFormatter{}
+	if err := table.PrintQueue(&buf, "portuguese", []models.QueueEntry{entry}); err != nil {
+		t.Fatal(err)
+	}
+	for _, want := range []string{"deck: portuguese", "POSITION", "ID", "FRONT", "What is saudade?"} {
+		if !strings.Contains(buf.String(), want) {
+			t.Fatalf("expected %q in queue table, got: %s", want, buf.String())
+		}
+	}
+}

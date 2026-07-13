@@ -2,7 +2,7 @@
 
 Binary: **`cards`**. Use `--json` on management commands for machine-readable output.
 
-> **Scaffold note:** `config`, `version`, `deck`, `add`, `list`, `show`, `edit`, and `delete` commands are implemented. Other commands below are the v1 specification — marked where not yet available.
+> **Scaffold note:** `config`, `version`, `deck`, `add`, `list`, `show`, `edit`, `delete`, and `queue` commands are implemented. Other commands below are the v1 specification — marked where not yet available.
 
 ## Global flags
 
@@ -153,7 +153,7 @@ cards delete portuguese 3 --json
 
 Show current queue order (position, card id, front preview). Useful for debugging and agent inspection.
 
-**Status:** Not yet implemented.
+**Status:** Implemented.
 
 **Example:**
 

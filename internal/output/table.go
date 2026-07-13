@@ -83,3 +83,24 @@ func printCardsTable(w io.Writer, cards []models.CardSummary) error {
 	}
 	return tw.Flush()
 }
+
+func (TableFormatter) PrintQueue(w io.Writer, deckName string, entries []models.QueueEntry) error {
+	if _, err := fmt.Fprintf(w, "deck: %s\n", deckName); err != nil {
+		return err
+	}
+	return printQueueTable(w, entries)
+}
+
+func printQueueTable(w io.Writer, entries []models.QueueEntry) error {
+	tw := tabwriter.NewWriter(w, 0, 0, 2, ' ', 0)
+	if _, err := fmt.Fprintln(tw, "POSITION\tID\tFRONT"); err != nil {
+		return err
+	}
+	for _, entry := range entries {
+		if _, err := fmt.Fprintf(tw, "%d\t%d\t%s\n",
+			entry.Position, entry.ID, entry.FrontPreview); err != nil {
+			return err
+		}
+	}
+	return tw.Flush()
+}
