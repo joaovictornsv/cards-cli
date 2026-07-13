@@ -21,7 +21,7 @@ cards study portuguese   # interactive — run yourself in the terminal
 | `edit` | Edit card front/back | Available |
 | `delete` | Remove a card from deck and queue | Available |
 | `queue` | Show current queue order | Available |
-| `study` | Interactive study session | Planned (v1) — **user-run only** |
+| `study` | Interactive study session | Available — **user-run only** |
 | `stats` | Deck stats and session nudge | Planned (v1) |
 | `config` | Show resolved configuration | Available |
 | `version` | Show CLI version and build metadata | Available |

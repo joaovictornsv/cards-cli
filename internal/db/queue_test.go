@@ -120,3 +120,95 @@ func TestListQueueByDeckNotFound(t *testing.T) {
 		t.Fatalf("expected ErrDeckNotFound, got %v", err)
 	}
 }
+
+func TestListQueueCardIDsByDeck(t *testing.T) {
+	database, err := OpenMemory()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer database.Close()
+
+	repo := NewRepository(database)
+	ctx := context.Background()
+	deck, cards := setupDeckWithCards(t, repo, ctx)
+
+	ids, err := repo.ListQueueCardIDsByDeck(ctx, "portuguese")
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := []int64{cards[2].ID, cards[1].ID, cards[0].ID}
+	for i, id := range want {
+		if ids[i] != id {
+			t.Fatalf("ids[%d] = %d, want %d", i, ids[i], id)
+		}
+	}
+
+	_, err = repo.ListQueueCardIDsByDeck(ctx, "missing")
+	if !errors.Is(err, ErrDeckNotFound) {
+		t.Fatalf("expected ErrDeckNotFound, got %v", err)
+	}
+
+	_ = deck
+}
+
+func TestReplaceDeckQueue(t *testing.T) {
+	database, err := OpenMemory()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer database.Close()
+
+	repo := NewRepository(database)
+	ctx := context.Background()
+	deck, cards := setupDeckWithCards(t, repo, ctx)
+
+	reordered := []int64{cards[0].ID, cards[2].ID, cards[1].ID}
+	if err := repo.ReplaceDeckQueue(ctx, deck.ID, reordered); err != nil {
+		t.Fatal(err)
+	}
+
+	ids, err := repo.ListQueueCardIDsByDeck(ctx, "portuguese")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for i, id := range reordered {
+		if ids[i] != id {
+			t.Fatalf("ids[%d] = %d, want %d", i, ids[i], id)
+		}
+	}
+
+	entries, err := repo.ListQueueByDeck(ctx, "portuguese")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if entries[0].FrontPreview != "first" || entries[1].FrontPreview != "third" || entries[2].FrontPreview != "second" {
+		t.Fatalf("unexpected queue order: %+v", entries)
+	}
+}
+
+func TestReplaceDeckQueueEmpty(t *testing.T) {
+	database, err := OpenMemory()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer database.Close()
+
+	repo := NewRepository(database)
+	ctx := context.Background()
+	deck, err := repo.CreateDeck(ctx, models.Deck{Name: "portuguese"})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if err := repo.ReplaceDeckQueue(ctx, deck.ID, nil); err != nil {
+		t.Fatal(err)
+	}
+
+	ids, err := repo.ListQueueCardIDsByDeck(ctx, "portuguese")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(ids) != 0 {
+		t.Fatalf("expected empty queue, got %v", ids)
+	}
+}
