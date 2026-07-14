@@ -10,7 +10,7 @@ Phrase → command. Always append `--json` for management operations. See [SKILL
 | --- | --- |
 | "Create a deck called portuguese" | `cards deck create "portuguese" --json` |
 | "List my decks" | `cards deck list --json` |
-| "Delete the portuguese deck" | `cards deck delete "portuguese" --json` |
+| "Delete the portuguese deck" | `cards deck delete "portuguese" --json --yes` |
 
 ## Cards
 
@@ -22,12 +22,11 @@ Phrase → command. Always append `--json` for management operations. See [SKILL
 | "Edit card 3 front text" | `cards edit "portuguese" 3 --front "new front" --json` |
 | "Delete card 3 from portuguese" | `cards delete "portuguese" 3 --json` |
 
-## Queue and stats
+## Queue
 
 | User says | Command |
 | --- | --- |
 | "Show the queue for portuguese" | `cards queue "portuguese" --json` |
-| "Stats for portuguese deck" | `cards stats "portuguese" --json` |
 
 ## Config
 

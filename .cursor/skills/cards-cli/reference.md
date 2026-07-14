@@ -22,17 +22,9 @@ Global config keys in `config.toml`:
 | `again_offset` | `2` | Queue re-insert offset for `again` grade |
 | `hard_offset` | `5` | Queue re-insert offset for `hard` grade |
 
-## Grades (study — user-run only)
+## Study (user-run only)
 
-| Grade | Queue behavior |
-| --- | --- |
-| `again` | Insert at front + `again_offset` |
-| `hard` | Insert at front + `hard_offset` |
-| `easy` | Insert at end of queue |
-
-Agents do not run study sessions. Documented here for context when inspecting queue state.
-
-Study flags: `--limit N` (override config `batch_size`), `--json` (session log after interactive output).
+Agents do not run `cards study`. Grades affect queue position: `again` → front + `again_offset`, `hard` → front + `hard_offset`, `easy` → end. If a user shares study output, session log JSON may include `deck`, `batch_size`, `reviews`, and `status` (`complete` or `quit`).
 
 ## Commands (management)
 
@@ -40,7 +32,7 @@ Study flags: `--limit N` (override config `batch_size`), `--json` (session log a
 | --- | --- |
 | `deck create <name>` | Available |
 | `deck list` | Available |
-| `deck delete <name>` | Available |
+| `deck delete <name>` | Available (`--yes` required with `--json`) |
 | `add <deck> --front --back` | Available |
 | `list <deck>` | Available |
 | `show <deck> <id>` | Available |
@@ -48,11 +40,10 @@ Study flags: `--limit N` (override config `batch_size`), `--json` (session log a
 | `delete <deck> <id>` | Available |
 | `queue <deck>` | Available |
 | `study <deck>` | Available (user-run only; agents must not invoke) |
-| `stats <deck>` | Planned (v1) |
 | `config` | Available |
 | `version` | Available |
 
-## JSON shapes (stubs)
+## JSON shapes
 
 **Config** (`cards config --json`):
 
@@ -124,7 +115,7 @@ Study flags: `--limit N` (override config `batch_size`), `--json` (session log a
 }
 ```
 
-**Study session log** (`cards study <deck> --json` — user-run; JSON printed after interactive output):
+**Study session log** (user-run; JSON printed after interactive output):
 
 ```json
 {
@@ -135,19 +126,5 @@ Study flags: `--limit N` (override config `batch_size`), `--json` (session log a
   "reviews": [
     { "card_id": 1, "front": "What is saudade?", "grade": "easy", "position": 1 }
   ]
-}
-```
-
-`status` is `"complete"` or `"quit"` (mid-session quit via `q`).
-
-**Stats** (planned):
-
-```json
-{
-  "deck": "portuguese",
-  "card_count": 42,
-  "sessions_run": 5,
-  "last_session_at": "2026-07-08T18:30:00Z",
-  "nudge": "last session: 1 day ago"
 }
 ```

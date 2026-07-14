@@ -26,7 +26,7 @@ Unlike `books-cli` (primarily driven by AI agents — the user never runs those 
 | Who | What |
 |---|---|
 | **User (terminal)** | Run **interactive study sessions** (`cards study <deck>`) — one card at a time, grade with keyboard |
-| **AI agents** | **Deck and card management** — create/update/delete decks and cards, inspect queue, stats, etc. |
+| **AI agents** | **Deck and card management** — create/update/delete decks and cards, inspect queue, etc. |
 
 Study sessions must be **fully interactive** in the terminal: show one card at a time, let the user reveal the back, then choose a grade (`again`, `hard`, `easy`) via arrow keys and/or number keys.
 
@@ -94,7 +94,6 @@ Binary name: **`cards`**.
 | `cards delete <deck> <id>` | Remove a card from deck and queue | AI |
 | `cards queue <deck>` | Show current queue order (debug/inspection) | AI |
 | `cards study <deck>` | Run an **interactive** study session | **User** |
-| `cards stats <deck>` | Stats (card count, sessions run, last session nudge) | AI / user |
 | `cards config` | Show resolved config paths | AI |
 | `cards version` | Version and build info | either |
 
@@ -157,7 +156,6 @@ Session: portuguese (batch 4/4, 42 cards in deck)
 - `front` (plain text)
 - `back` (plain text)
 - `created_at`, `updated_at`
-- optional stats: `times_reviewed`, `last_grade`, `last_reviewed_at`, `sessions_since_review` (stats only — **not** used for scheduling in v1)
 
 **Queue**
 - ordered list of `card_id` per deck
@@ -215,7 +213,6 @@ Mirror `books-cli` since it’s a proven pattern in this environment:
 - [ ] **Interactive** study sessions with configurable batch size (default 4)
 - [ ] Persistent queue across sessions; immediate re-insert per graded card
 - [ ] New cards enter at **front** of queue
-- [ ] Basic stats + **nudge** (e.g. “last session: 3 days ago” in `cards stats`)
 - [ ] `cards config`, `cards version`, `--json` on list commands
 - [ ] Mid-session quit saves per-card progress
 - [ ] Empty deck → friendly error; small deck → `min(limit, deck_size)` cards
@@ -271,7 +268,7 @@ Mirror `books-cli` since it’s a proven pattern in this environment:
 
 | # | Topic | Clarification |
 |---|---|---|
-| U1 | Daily habit / nudges | **Nudge** in stats (e.g. “last session: 3 days ago”) — no streaks/guilt mechanics required for v1 |
+| U1 | Daily habit / nudges | **Deferred** — see [NEXT_STEPS.md](../NEXT_STEPS.md) for stats/nudge command |
 | U2 | Original “+5 / +2” wording | **Confirmed:** fewer positions forward = sooner review (`again` +2 sooner than `hard` +5) |
 | U3 | Archive on delete | **No** archive feature |
 | U4 | Duplicate cards | **Allow** duplicate front text |
@@ -319,7 +316,7 @@ Matches intent.
 - [x] **Default batch size:** 4 (global config, `--limit` override)
 - [x] **Mid-session quit:** save per card
 - [x] **Stale bump:** defer
-- [x] **Nudges:** yes (stats only)
+- [x] **Nudges:** deferred (see NEXT_STEPS.md)
 - [x] **Study UX:** interactive, arrows/numbers, user-run
 - [x] **Management:** AI-driven
 - [x] **Shuffle batch:** defer

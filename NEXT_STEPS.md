@@ -2,6 +2,10 @@
 
 Features planned for releases after v1. These are **not** tracked as v1 GitHub issues.
 
+## Stats and session nudge
+
+`cards stats <deck>` with per-deck session count, last-session timestamp, and nudge message. Deferred from v1.
+
 ## Search command
 
 Like `books-cli`: `cards search` with repeatable `--term` flags; OR-match across card front/back and deck names; `--json` for agents.
