@@ -7,6 +7,7 @@ import (
 	"github.com/joaovictornsv/cards-cli/internal/buildinfo"
 	"github.com/joaovictornsv/cards-cli/internal/config"
 	"github.com/joaovictornsv/cards-cli/internal/models"
+	"github.com/joaovictornsv/cards-cli/internal/study"
 )
 
 type JSONFormatter struct{}
@@ -91,4 +92,13 @@ func (JSONFormatter) PrintQueue(w io.Writer, deckName string, entries []models.Q
 		Deck:  deckName,
 		Queue: entries,
 	})
+}
+
+func (JSONFormatter) PrintStudyLog(w io.Writer, result study.Result) error {
+	if result.Reviews == nil {
+		result.Reviews = []study.Review{}
+	}
+	enc := json.NewEncoder(w)
+	enc.SetIndent("", "  ")
+	return enc.Encode(result)
 }

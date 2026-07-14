@@ -74,7 +74,8 @@ func TestSessionTwoCardReorder(t *testing.T) {
 		Input: NewScriptedInput([]queue.Grade{queue.GradeEasy}),
 		Opts:     Options{BatchSize: 1, QueueOpts: queue.DefaultOptions()},
 	}
-	if err := sess.Run(ctx); err != nil {
+	_, err = sess.Run(ctx)
+	if err != nil {
 		t.Fatal(err)
 	}
 
@@ -170,7 +171,8 @@ func TestSessionGoldenWalkthrough(t *testing.T) {
 		},
 	}
 
-	if err := sess.Run(ctx); err != nil {
+	_, err = sess.Run(ctx)
+	if err != nil {
 		t.Fatal(err)
 	}
 
@@ -232,7 +234,8 @@ func TestSessionSmallDeckBatchClamp(t *testing.T) {
 		},
 	}
 
-	if err := sess.Run(ctx); err != nil {
+	_, err = sess.Run(ctx)
+	if err != nil {
 		t.Fatal(err)
 	}
 
@@ -264,9 +267,110 @@ func TestSessionDeckNotFound(t *testing.T) {
 		Opts:     Options{BatchSize: 4, QueueOpts: queue.DefaultOptions()},
 	}
 
-	err = sess.Run(context.Background())
+	_, err = sess.Run(context.Background())
 	if !errors.Is(err, ErrDeckNotFound) {
 		t.Fatalf("expected ErrDeckNotFound, got %v", err)
+	}
+}
+
+func TestSessionEmptyDeck(t *testing.T) {
+	database, err := db.OpenMemory()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer database.Close()
+
+	repo := db.NewRepository(database)
+	ctx := context.Background()
+
+	if _, err := repo.CreateDeck(ctx, models.Deck{Name: "empty"}); err != nil {
+		t.Fatal(err)
+	}
+
+	sess := &Session{
+		DeckName: "empty",
+		Out:      &bytes.Buffer{},
+		Store:    NewDBStore(repo),
+		Input:    NewScriptedInput(nil),
+		Opts:     Options{BatchSize: 4, QueueOpts: queue.DefaultOptions()},
+	}
+
+	_, err = sess.Run(ctx)
+	if !errors.Is(err, ErrEmptyDeck) {
+		t.Fatalf("expected ErrEmptyDeck, got %v", err)
+	}
+}
+
+func TestSessionSameSessionRepeatsAllowed(t *testing.T) {
+	database, err := db.OpenMemory()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer database.Close()
+
+	repo := db.NewRepository(database)
+	ctx := context.Background()
+
+	if _, err := repo.CreateDeck(ctx, models.Deck{Name: "repeat"}); err != nil {
+		t.Fatal(err)
+	}
+
+	labels := []string{"D", "C", "B", "A"}
+	idByLabel := make(map[string]int64, len(labels))
+	for _, label := range labels {
+		card, err := repo.CreateCard(ctx, "repeat", models.Card{Front: label, Back: label})
+		if err != nil {
+			t.Fatal(err)
+		}
+		idByLabel[label] = card.ID
+	}
+
+	sess := &Session{
+		DeckName: "repeat",
+		Out:      &bytes.Buffer{},
+		Store:    NewDBStore(repo),
+		Input: NewScriptedInput([]queue.Grade{
+			queue.GradeAgain,
+			queue.GradeAgain,
+			queue.GradeAgain,
+			queue.GradeAgain,
+		}),
+		Opts: Options{
+			BatchSize: 4,
+			QueueOpts: queue.DefaultOptions(),
+		},
+	}
+
+	result, err := sess.Run(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if result.Status != "complete" {
+		t.Fatalf("expected status complete, got %q", result.Status)
+	}
+	if len(result.Reviews) != 4 {
+		t.Fatalf("expected 4 reviews, got %d", len(result.Reviews))
+	}
+
+	ids, err := repo.ListQueueCardIDsByDeck(ctx, "repeat")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(ids) != 4 {
+		t.Fatalf("expected 4 cards in queue, got %d", len(ids))
+	}
+
+	labelByID := make(map[int64]string, len(idByLabel))
+	for label, id := range idByLabel {
+		labelByID[id] = label
+	}
+	// All again: final queue [A, B, D, C] per re-insert rules
+	wantLabels := []string{"A", "B", "D", "C"}
+	for i, id := range ids {
+		got := labelByID[id]
+		if got != wantLabels[i] {
+			t.Fatalf("position %d: got %q, want %q", i, got, wantLabels[i])
+		}
 	}
 }
 
@@ -300,8 +404,15 @@ func TestSessionQuitPersistsPendingBatch(t *testing.T) {
 		},
 	}
 
-	if err := sess.Run(ctx); err != nil {
+	result, err := sess.Run(ctx)
+	if err != nil {
 		t.Fatalf("expected nil after quit persist, got %v", err)
+	}
+	if result.Status != "quit" {
+		t.Fatalf("expected status quit, got %q", result.Status)
+	}
+	if len(result.Reviews) != 1 {
+		t.Fatalf("expected 1 review before quit, got %d", len(result.Reviews))
 	}
 
 	ids, err := repo.ListQueueCardIDsByDeck(ctx, "quit")

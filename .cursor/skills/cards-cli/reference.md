@@ -32,6 +32,8 @@ Global config keys in `config.toml`:
 
 Agents do not run study sessions. Documented here for context when inspecting queue state.
 
+Study flags: `--limit N` (override config `batch_size`), `--json` (session log after interactive output).
+
 ## Commands (management)
 
 | Command | Status |
@@ -121,6 +123,22 @@ Agents do not run study sessions. Documented here for context when inspecting qu
   ]
 }
 ```
+
+**Study session log** (`cards study <deck> --json` — user-run; JSON printed after interactive output):
+
+```json
+{
+  "deck": "portuguese",
+  "batch_size": 4,
+  "deck_size": 42,
+  "status": "complete",
+  "reviews": [
+    { "card_id": 1, "front": "What is saudade?", "grade": "easy", "position": 1 }
+  ]
+}
+```
+
+`status` is `"complete"` or `"quit"` (mid-session quit via `q`).
 
 **Stats** (planned):
 

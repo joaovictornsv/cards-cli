@@ -9,7 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- `cards study` interactive study session (batch pull, reveal/grade UX, per-card queue persistence)
+- `cards study --limit` batch size override (default from config `batch_size`)
+- `cards study --json` session log emitted after interactive output (deck, batch size, reviews, status)
+- Friendly empty-deck error with hint to use `cards add`
+- `internal/study` `Result` and `Review` types for session logging
+- `PrintStudyLog` formatter in `internal/output`
 - `internal/study` package with testable session engine and terminal input handling
 - `ListQueueCardIDsByDeck` and `ReplaceDeckQueue` repository methods for study queue updates
 - `cards queue` command with `--json` output for inspecting deck queue order
