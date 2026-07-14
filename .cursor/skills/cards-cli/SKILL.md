@@ -2,7 +2,7 @@
 name: cards-cli
 description: >-
   Manage flashcard decks and cards via the cards CLI (deck create/list/delete,
-  add, list, show, edit, delete, queue, stats, config). Use when the user
+  add, list, show, edit, delete, queue, config). Use when the user
   mentions flashcards, decks, cards, study queue, spaced repetition queue,
   or cards-cli. Do NOT use for interactive study sessions — those are user-run.
 ---
@@ -27,41 +27,24 @@ Operate the `cards` CLI in the shell for **deck and card management** — never 
 
 Always append `--json` for management commands.
 
-## Deck management
+## Commands
 
-```bash
-cards deck create "<name>" --json
-cards deck list --json
-cards deck delete "<name>" --json
-```
-
-## Card management
-
-```bash
-cards add "<deck>" --front "..." --back "..." --json
-cards list "<deck>" --json
-cards show "<deck>" <id> --json
-cards edit "<deck>" <id> [--front "..."] [--back "..."] --json
-cards delete "<deck>" <id> --json
-```
-
-## Queue and stats
-
-```bash
-cards queue "<deck>" --json
-cards stats "<deck>" --json
-```
-
-## Configuration
-
-```bash
-cards config --json
-```
+| Command | Notes |
+| --- | --- |
+| `cards deck create "<name>" --json` | |
+| `cards deck list --json` | |
+| `cards deck delete "<name>" --json --yes` | `--yes` required with `--json` |
+| `cards add "<deck>" --front "..." --back "..." --json` | New cards go to front of queue |
+| `cards list "<deck>" --json` | Metadata only, not queue order |
+| `cards show "<deck>" <id> --json` | |
+| `cards edit "<deck>" <id> [--front "..."] [--back "..."] --json` | At least one of `--front` / `--back` |
+| `cards delete "<deck>" <id> --json` | |
+| `cards queue "<deck>" --json` | Queue order inspection |
+| `cards config --json` | Resolved paths and study defaults |
+| `cards version --json` | |
 
 ## Errors
 
 Exit `0` = success; `1` = validation, not found, or DB error. If `cards` missing: `go install ./cmd/cards` or build `./cards`.
 
 See [reference.md](reference.md) for JSON shapes and [examples.md](examples.md) for phrase mappings.
-
-**Note:** Many commands are not yet implemented in early versions — check CLI help or repo issues if a command fails.

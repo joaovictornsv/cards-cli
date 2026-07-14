@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Migration `002_drop_card_stats.sql` — remove unused per-card stats columns from schema
+- Docs audit: concise agent guidance, fixed `deck delete --yes` with `--json`, removed deferred `stats` references
 - `cards study --limit` batch size override (default from config `batch_size`)
 - `cards study --json` session log emitted after interactive output (deck, batch size, reviews, status)
 - Friendly empty-deck error with hint to use `cards add`
