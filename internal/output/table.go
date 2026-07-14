@@ -8,6 +8,7 @@ import (
 	"github.com/joaovictornsv/cards-cli/internal/buildinfo"
 	"github.com/joaovictornsv/cards-cli/internal/config"
 	"github.com/joaovictornsv/cards-cli/internal/models"
+	"github.com/joaovictornsv/cards-cli/internal/study"
 )
 
 type TableFormatter struct{}
@@ -89,6 +90,10 @@ func (TableFormatter) PrintQueue(w io.Writer, deckName string, entries []models.
 		return err
 	}
 	return printQueueTable(w, entries)
+}
+
+func (TableFormatter) PrintStudyLog(w io.Writer, result study.Result) error {
+	return nil
 }
 
 func printQueueTable(w io.Writer, entries []models.QueueEntry) error {
