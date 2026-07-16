@@ -1,5 +1,5 @@
 ---
-name: github-issues
+name: gh-issue
 description: >-
   Create GitHub issues for cards-cli with consistent structure, branch naming,
   acceptance criteria, and execution steps. Use when the user asks to create,
