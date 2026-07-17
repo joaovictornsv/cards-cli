@@ -1,0 +1,1 @@
+ALTER TABLE cards ADD COLUMN replace_eligible INTEGER NOT NULL DEFAULT 0;

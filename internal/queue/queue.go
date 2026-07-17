@@ -10,8 +10,9 @@ var ErrInvalidGrade = errors.New("invalid grade")
 type Grade string
 
 const (
-	GradeAgain Grade = "again"
-	GradeEasy  Grade = "easy"
+	GradeAgain   Grade = "again"
+	GradeEasy    Grade = "easy"
+	GradeReplace Grade = "replace"
 )
 
 type Options struct {
@@ -28,7 +29,7 @@ func DefaultOptions() Options {
 // length (after the reviewed card was removed).
 func InsertIndex(grade Grade, queueLen int, opts Options) (int, error) {
 	switch grade {
-	case GradeEasy:
+	case GradeEasy, GradeReplace:
 		return queueLen, nil
 	case GradeAgain:
 		return clampIndex(opts.AgainOffset, queueLen), nil

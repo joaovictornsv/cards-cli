@@ -58,8 +58,8 @@ func printDecksTable(w io.Writer, decks []models.Deck) error {
 
 func (TableFormatter) PrintCard(w io.Writer, card models.Card) error {
 	_, err := fmt.Fprintf(w,
-		"id: %d\nfront: %s\nback: %s\ncreated_at: %s\nupdated_at: %s\n",
-		card.ID, card.Front, card.Back, card.CreatedAt, card.UpdatedAt,
+		"id: %d\nfront: %s\nback: %s\ncreated_at: %s\nupdated_at: %s\nreplace_eligible: %t\n",
+		card.ID, card.Front, card.Back, card.CreatedAt, card.UpdatedAt, card.ReplaceEligible,
 	)
 	return err
 }
@@ -73,12 +73,12 @@ func (TableFormatter) PrintCards(w io.Writer, deckName string, cards []models.Ca
 
 func printCardsTable(w io.Writer, cards []models.CardSummary) error {
 	tw := tabwriter.NewWriter(w, 0, 0, 2, ' ', 0)
-	if _, err := fmt.Fprintln(tw, "ID\tFRONT\tCREATED\tUPDATED"); err != nil {
+	if _, err := fmt.Fprintln(tw, "ID\tFRONT\tCREATED\tUPDATED\tREPLACE"); err != nil {
 		return err
 	}
 	for _, card := range cards {
-		if _, err := fmt.Fprintf(tw, "%d\t%s\t%s\t%s\n",
-			card.ID, card.Front, card.CreatedAt, card.UpdatedAt); err != nil {
+		if _, err := fmt.Fprintf(tw, "%d\t%s\t%s\t%s\t%t\n",
+			card.ID, card.Front, card.CreatedAt, card.UpdatedAt, card.ReplaceEligible); err != nil {
 			return err
 		}
 	}

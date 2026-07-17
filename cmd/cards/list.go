@@ -13,8 +13,9 @@ var listCmd = &cobra.Command{
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		deckName := args[0]
+		replaceEligibleOnly, _ := cmd.Flags().GetBool("replace-eligible")
 		return runWithRepo(cmd.Context(), func(ctx context.Context, repo *db.Repository) error {
-			cards, err := repo.ListCardsByDeck(ctx, deckName)
+			cards, err := repo.ListCardsByDeck(ctx, deckName, replaceEligibleOnly)
 			if err != nil {
 				return handleRepoError(err)
 			}
@@ -24,5 +25,6 @@ var listCmd = &cobra.Command{
 }
 
 func init() {
+	listCmd.Flags().Bool("replace-eligible", false, "List only cards flagged for content replacement")
 	rootCmd.AddCommand(listCmd)
 }

@@ -426,6 +426,61 @@ func TestSessionQuitPersistsPendingBatch(t *testing.T) {
 	}
 }
 
+func TestSessionReplaceReinsertsAndFlagsCard(t *testing.T) {
+	database, err := db.OpenMemory()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer database.Close()
+
+	repo := db.NewRepository(database)
+	ctx := context.Background()
+
+	if _, err := repo.CreateDeck(ctx, models.Deck{Name: "replace"}); err != nil {
+		t.Fatal(err)
+	}
+	for _, label := range []string{"B", "A"} {
+		if _, err := repo.CreateCard(ctx, "replace", models.Card{Front: label, Back: label}); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	sess := &Session{
+		DeckName: "replace",
+		Out:      &bytes.Buffer{},
+		Store:    NewDBStore(repo),
+		Input:    NewScriptedInput([]queue.Grade{queue.GradeReplace}),
+		Opts:     Options{BatchSize: 1, QueueOpts: queue.DefaultOptions()},
+	}
+	result, err := sess.Run(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(result.Reviews) != 1 || result.Reviews[0].Grade != queue.GradeReplace {
+		t.Fatalf("expected replace review, got %+v", result.Reviews)
+	}
+
+	ids, err := repo.ListQueueCardIDsByDeck(ctx, "replace")
+	if err != nil {
+		t.Fatal(err)
+	}
+	entries, err := repo.ListQueueByDeck(ctx, "replace")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(entries) != 2 || entries[0].FrontPreview != "B" || entries[1].FrontPreview != "A" {
+		t.Fatalf("expected [B, A] after replace (same as easy), got queue ids %v entries %+v", ids, entries)
+	}
+
+	card, err := repo.GetCardByDeckAndID(ctx, "replace", result.Reviews[0].CardID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !card.ReplaceEligible {
+		t.Fatal("expected replace_eligible true on graded card")
+	}
+}
+
 func labelsFromIDs(ids []int64, labelByID map[int64]string) []string {
 	out := make([]string, len(ids))
 	for i, id := range ids {

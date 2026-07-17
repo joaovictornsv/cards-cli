@@ -37,6 +37,21 @@ func TestMigrationsIdempotent(t *testing.T) {
 	}
 }
 
+func TestMigrationReplaceEligibleColumn(t *testing.T) {
+	database, err := OpenMemory()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer database.Close()
+
+	var name string
+	err = database.SQL().QueryRow(`
+		SELECT name FROM pragma_table_info('cards') WHERE name = 'replace_eligible'`).Scan(&name)
+	if err != nil {
+		t.Fatalf("replace_eligible column: %v", err)
+	}
+}
+
 func TestOpenCreatesParentDir(t *testing.T) {
 	dir := t.TempDir()
 	path := filepath.Join(dir, "nested", "cards.db")

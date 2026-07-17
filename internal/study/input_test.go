@@ -20,6 +20,8 @@ func TestParseGradeBytes(t *testing.T) {
 		{name: "up arrow", input: []byte{27, '[', 'A'}, want: queue.GradeAgain, wantOk: true},
 		{name: "left arrow", input: []byte{27, '[', 'D'}, want: queue.GradeAgain, wantOk: true},
 		{name: "right arrow", input: []byte{27, '[', 'C'}, want: queue.GradeEasy, wantOk: true},
+		{name: "r replace", input: []byte{'r'}, want: queue.GradeReplace, wantOk: true},
+		{name: "R replace", input: []byte{'R'}, want: queue.GradeReplace, wantOk: true},
 		{name: "q quit", input: []byte{'q'}, wantErr: ErrQuit},
 		{name: "unknown", input: []byte{'x'}, wantOk: false},
 	}

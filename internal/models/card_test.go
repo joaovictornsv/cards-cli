@@ -126,7 +126,7 @@ func TestCardValidateForUpdate(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			var card Card
-			err := card.ValidateForUpdate(tt.front, tt.back)
+			err := card.ValidateForUpdate(tt.front, tt.back, nil)
 			if tt.wantErr != nil {
 				if !errors.Is(err, tt.wantErr) {
 					t.Fatalf("expected %v, got %v", tt.wantErr, err)
