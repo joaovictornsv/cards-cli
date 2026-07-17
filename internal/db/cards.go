@@ -214,13 +214,23 @@ func (r *Repository) DeleteCard(ctx context.Context, deckName string, cardID int
 }
 
 // compactQueueAfterDelete renumbers queue positions after a card is removed.
+// Uses temporary negative positions to avoid primary-key collisions on
+// (deck_id, position).
 func compactQueueAfterDelete(ctx context.Context, tx *sql.Tx, deckID int64, deletedPosition int) error {
 	if _, err := tx.ExecContext(ctx, `
-		UPDATE queue SET position = position - 1
+		UPDATE queue SET position = -(position - ?)
 		WHERE deck_id = ? AND position > ?`,
-		deckID, deletedPosition,
+		deletedPosition, deckID, deletedPosition,
 	); err != nil {
-		return fmt.Errorf("compact queue positions: %w", err)
+		return fmt.Errorf("shift queue positions after delete: %w", err)
+	}
+
+	if _, err := tx.ExecContext(ctx, `
+		UPDATE queue SET position = ? - position - 1
+		WHERE deck_id = ? AND position < 0`,
+		deletedPosition, deckID,
+	); err != nil {
+		return fmt.Errorf("normalize queue positions after delete: %w", err)
 	}
 	return nil
 }

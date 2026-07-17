@@ -470,6 +470,70 @@ func TestDeleteCardRemovesFromQueue(t *testing.T) {
 	}
 }
 
+func TestDeleteCardCompactsLargeQueue(t *testing.T) {
+	database, err := OpenMemory()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer database.Close()
+
+	repo := NewRepository(database)
+	ctx := context.Background()
+
+	deck, err := repo.CreateDeck(ctx, models.Deck{Name: "large"})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	const n = 70
+	cards := make([]models.Card, n)
+	for i := 0; i < n; i++ {
+		card, err := repo.CreateCard(ctx, "large", models.Card{
+			Front: "card",
+			Back:  "back",
+		})
+		if err != nil {
+			t.Fatal(err)
+		}
+		cards[i] = card
+	}
+
+	// Delete from the middle of a large queue (regression for UNIQUE collisions).
+	middle := n / 2
+	if _, err := repo.DeleteCard(ctx, "large", cards[middle].ID); err != nil {
+		t.Fatal(err)
+	}
+
+	rows, err := database.SQL().QueryContext(ctx, `
+		SELECT position FROM queue WHERE deck_id = ? ORDER BY position`,
+		deck.ID,
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer rows.Close()
+
+	prev := -1
+	count := 0
+	for rows.Next() {
+		var pos int
+		if err := rows.Scan(&pos); err != nil {
+			t.Fatal(err)
+		}
+		if pos != prev+1 {
+			t.Fatalf("expected contiguous positions, got %d after %d", pos, prev)
+		}
+		prev = pos
+		count++
+	}
+	if err := rows.Err(); err != nil {
+		t.Fatal(err)
+	}
+	if count != n-1 {
+		t.Fatalf("expected %d queue entries, got %d", n-1, count)
+	}
+}
+
 func TestDeleteCardNotFound(t *testing.T) {
 	database, err := OpenMemory()
 	if err != nil {
