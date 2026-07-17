@@ -7,10 +7,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Removed
-
-- Study session `hard` grade and `hard_offset` config key — grading is now binary (`again` / `easy`)
-
 ### Added
 
 - Migration `002_drop_card_stats.sql` — remove unused per-card stats columns from schema
@@ -41,6 +37,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `internal/db` package with `Open` / `OpenMemory` and idempotent migration runner (`modernc.org/sqlite`)
 - `internal/output` package with table and JSON formatters for `config` and `version`
 - `runWithRepo` helper in CLI root for future DB-backed commands
+
+## [0.1.1] - 2026-07-16
+
+### Removed
+
+- Study session `hard` grade and `hard_offset` config key — grading is now binary (`again` / `easy`)
 
 ## [0.0.0] - TBD
 
