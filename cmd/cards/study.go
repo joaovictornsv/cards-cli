@@ -63,7 +63,6 @@ func runStudyWithRepo(ctx context.Context, repo *db.Repository, deckName string,
 			BatchSize: batchSize,
 			QueueOpts: queue.Options{
 				AgainOffset: cfg.AgainOffset,
-				HardOffset:  cfg.HardOffset,
 			},
 		},
 	}

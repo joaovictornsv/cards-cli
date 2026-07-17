@@ -49,7 +49,6 @@ Pre-built binaries for linux/amd64 will be available on [GitHub Releases](https:
 database = "/home/user/cards.db"
 batch_size = 4
 again_offset = 2
-hard_offset = 5
 ```
 
 Run `cards config` to see which path is in use.

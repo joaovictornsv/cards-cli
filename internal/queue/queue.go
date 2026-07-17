@@ -11,19 +11,16 @@ type Grade string
 
 const (
 	GradeAgain Grade = "again"
-	GradeHard  Grade = "hard"
 	GradeEasy  Grade = "easy"
 )
 
 type Options struct {
 	AgainOffset int
-	HardOffset  int
 }
 
 func DefaultOptions() Options {
 	return Options{
 		AgainOffset: 2,
-		HardOffset:  5,
 	}
 }
 
@@ -35,8 +32,6 @@ func InsertIndex(grade Grade, queueLen int, opts Options) (int, error) {
 		return queueLen, nil
 	case GradeAgain:
 		return clampIndex(opts.AgainOffset, queueLen), nil
-	case GradeHard:
-		return clampIndex(opts.HardOffset, queueLen), nil
 	default:
 		return 0, fmt.Errorf("%w: %q", ErrInvalidGrade, grade)
 	}

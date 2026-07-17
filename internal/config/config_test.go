@@ -76,7 +76,4 @@ func TestResolveDefaults(t *testing.T) {
 	if cfg.AgainOffset != 2 {
 		t.Fatalf("got again_offset %d, want 2", cfg.AgainOffset)
 	}
-	if cfg.HardOffset != 5 {
-		t.Fatalf("got hard_offset %d, want 5", cfg.HardOffset)
-	}
 }

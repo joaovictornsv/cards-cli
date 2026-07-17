@@ -104,7 +104,7 @@ cards queue portuguese --json
 
 ## `cards study <deck>`
 
-Run an **interactive** study session. One card at a time: show front → reveal back → grade (`again`, `hard`, `easy`).
+Run an **interactive** study session. One card at a time: show front → reveal back → grade (`again`, `easy`).
 
 **Primary user:** human in the terminal (not AI agents).
 
@@ -118,13 +118,12 @@ Run an **interactive** study session. One card at a time: show front → reveal 
 | Grade | Behavior |
 | --- | --- |
 | `again` | Insert at front + `again_offset` (default 2) |
-| `hard` | Insert at front + `hard_offset` (default 5) |
 | `easy` | Insert at end of queue |
 
 **Interactive controls:**
 
 - Space/Enter — reveal back
-- Arrow keys or `1`/`2`/`3` — grade (again / hard / easy)
+- Arrow keys or `1`/`2` — grade (again / easy)
 - `q` — quit mid-session (graded cards saved; unreviewed batch cards stay at front)
 
 ```bash
@@ -154,7 +153,6 @@ cards config --json
 | `database` | (see above) | SQLite database path |
 | `batch_size` | `4` | Default study batch size |
 | `again_offset` | `2` | Queue offset for `again` grade |
-| `hard_offset` | `5` | Queue offset for `hard` grade |
 
 ## `cards version`
 

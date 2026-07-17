@@ -18,9 +18,8 @@ func (JSONFormatter) PrintConfig(w io.Writer, cfg config.Config) error {
 		"config_path":   cfg.ConfigPath,
 		"config_exists": cfg.ConfigExists,
 		"source":        cfg.Source,
-		"batch_size":    cfg.BatchSize,
-		"again_offset":  cfg.AgainOffset,
-		"hard_offset":   cfg.HardOffset,
+		"batch_size":   cfg.BatchSize,
+		"again_offset": cfg.AgainOffset,
 	}
 	enc := json.NewEncoder(w)
 	enc.SetIndent("", "  ")

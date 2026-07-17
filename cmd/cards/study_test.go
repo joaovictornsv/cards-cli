@@ -23,7 +23,7 @@ func TestStudySessionQueueMutation(t *testing.T) {
 		return study.NewScriptedInput([]queue.Grade{
 			queue.GradeEasy,
 			queue.GradeAgain,
-			queue.GradeHard,
+			queue.GradeAgain,
 			queue.GradeEasy,
 		})
 	}
@@ -76,7 +76,7 @@ func TestStudySessionQueueMutation(t *testing.T) {
 		t.Fatalf("decode queue JSON: %v\noutput: %s", err, buf.String())
 	}
 
-	wantLabels := []string{"E", "F", "B", "G", "H", "C", "A", "D"}
+	wantLabels := []string{"E", "F", "C", "B", "G", "H", "A", "D"}
 	labelByID := make(map[int64]string)
 	for label, id := range idByLabel {
 		labelByID[id] = label
@@ -280,7 +280,7 @@ func TestRunStudyWithRepo(t *testing.T) {
 	}
 	t.Cleanup(func() { studyInputFactory = oldFactory })
 
-	cfg := config.Config{BatchSize: 4, AgainOffset: 2, HardOffset: 5}
+	cfg := config.Config{BatchSize: 4, AgainOffset: 2}
 	if err := runStudyWithRepo(context.Background(), repo, "small", cfg, 4, nil, &out); err != nil {
 		t.Fatal(err)
 	}
