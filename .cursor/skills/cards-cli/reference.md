@@ -20,11 +20,10 @@ Global config keys in `config.toml`:
 | --- | --- | --- |
 | `batch_size` | `4` | Default study session batch size |
 | `again_offset` | `2` | Queue re-insert offset for `again` grade |
-| `hard_offset` | `5` | Queue re-insert offset for `hard` grade |
 
 ## Study (user-run only)
 
-Agents do not run `cards study`. Grades affect queue position: `again` → front + `again_offset`, `hard` → front + `hard_offset`, `easy` → end. If a user shares study output, session log JSON may include `deck`, `batch_size`, `reviews`, and `status` (`complete` or `quit`).
+Agents do not run `cards study`. Grades affect queue position: `again` → front + `again_offset`, `easy` → end. If a user shares study output, session log JSON may include `deck`, `batch_size`, `reviews`, and `status` (`complete` or `quit`).
 
 ## Commands (management)
 
@@ -54,8 +53,7 @@ Agents do not run `cards study`. Grades affect queue position: `again` → front
   "config_exists": false,
   "source": "default",
   "batch_size": 4,
-  "again_offset": 2,
-  "hard_offset": 5
+  "again_offset": 2
 }
 ```
 

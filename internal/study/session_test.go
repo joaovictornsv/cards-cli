@@ -162,7 +162,7 @@ func TestSessionGoldenWalkthrough(t *testing.T) {
 		Input: NewScriptedInput([]queue.Grade{
 			queue.GradeEasy,
 			queue.GradeAgain,
-			queue.GradeHard,
+			queue.GradeAgain,
 			queue.GradeEasy,
 		}),
 		Opts: Options{
@@ -181,7 +181,7 @@ func TestSessionGoldenWalkthrough(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	wantLabels := []string{"E", "F", "B", "G", "H", "C", "A", "D"}
+	wantLabels := []string{"E", "F", "C", "B", "G", "H", "A", "D"}
 	if len(ids) != len(wantLabels) {
 		t.Fatalf("queue length = %d, want %d", len(ids), len(wantLabels))
 	}

@@ -16,10 +16,9 @@ func TestParseGradeBytes(t *testing.T) {
 		wantErr error
 	}{
 		{name: "1 again", input: []byte{'1'}, want: queue.GradeAgain, wantOk: true},
-		{name: "2 hard", input: []byte{'2'}, want: queue.GradeHard, wantOk: true},
-		{name: "3 easy", input: []byte{'3'}, want: queue.GradeEasy, wantOk: true},
+		{name: "2 easy", input: []byte{'2'}, want: queue.GradeEasy, wantOk: true},
 		{name: "up arrow", input: []byte{27, '[', 'A'}, want: queue.GradeAgain, wantOk: true},
-		{name: "down arrow", input: []byte{27, '[', 'B'}, want: queue.GradeHard, wantOk: true},
+		{name: "left arrow", input: []byte{27, '[', 'D'}, want: queue.GradeAgain, wantOk: true},
 		{name: "right arrow", input: []byte{27, '[', 'C'}, want: queue.GradeEasy, wantOk: true},
 		{name: "q quit", input: []byte{'q'}, wantErr: ErrQuit},
 		{name: "unknown", input: []byte{'x'}, wantOk: false},

@@ -15,7 +15,6 @@ const (
 
 	defaultBatchSize   = 4
 	defaultAgainOffset = 2
-	defaultHardOffset  = 5
 )
 
 type Source string
@@ -31,16 +30,14 @@ type Config struct {
 	ConfigPath   string
 	ConfigExists bool
 	Source       Source
-	BatchSize    int
-	AgainOffset  int
-	HardOffset   int
+	BatchSize   int
+	AgainOffset int
 }
 
 type fileConfig struct {
 	Database    string `toml:"database"`
 	BatchSize   int    `toml:"batch_size"`
 	AgainOffset int    `toml:"again_offset"`
-	HardOffset  int    `toml:"hard_offset"`
 }
 
 func Resolve() (Config, error) {
@@ -66,10 +63,6 @@ func Resolve() (Config, error) {
 	if fc.AgainOffset > 0 {
 		againOffset = fc.AgainOffset
 	}
-	hardOffset := defaultHardOffset
-	if fc.HardOffset > 0 {
-		hardOffset = fc.HardOffset
-	}
 
 	if v := os.Getenv(envDatabase); v != "" {
 		return Config{
@@ -79,7 +72,6 @@ func Resolve() (Config, error) {
 			Source:       SourceEnv,
 			BatchSize:    batchSize,
 			AgainOffset:  againOffset,
-			HardOffset:   hardOffset,
 		}, nil
 	}
 
@@ -91,7 +83,6 @@ func Resolve() (Config, error) {
 			Source:       SourceConfigFile,
 			BatchSize:    batchSize,
 			AgainOffset:  againOffset,
-			HardOffset:   hardOffset,
 		}, nil
 	}
 
@@ -103,7 +94,6 @@ func Resolve() (Config, error) {
 		Source:       SourceDefault,
 		BatchSize:    batchSize,
 		AgainOffset:  againOffset,
-		HardOffset:   hardOffset,
 	}, nil
 }
 

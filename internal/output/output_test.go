@@ -16,9 +16,8 @@ func TestJSONFormatter(t *testing.T) {
 		ConfigPath:   "/home/user/.config/cards/config.toml",
 		ConfigExists: false,
 		Source:       config.SourceDefault,
-		BatchSize:    4,
-		AgainOffset:  2,
-		HardOffset:   5,
+		BatchSize:   4,
+		AgainOffset: 2,
 	}
 
 	var buf bytes.Buffer
@@ -34,7 +33,6 @@ func TestJSONFormatter(t *testing.T) {
 		`"source": "default"`,
 		`"batch_size": 4`,
 		`"again_offset": 2`,
-		`"hard_offset": 5`,
 	} {
 		if !strings.Contains(out, want) {
 			t.Fatalf("expected %q in config json, got: %s", want, out)
@@ -68,9 +66,8 @@ func TestTableFormatter(t *testing.T) {
 		ConfigPath:   "/home/user/.config/cards/config.toml",
 		ConfigExists: false,
 		Source:       config.SourceDefault,
-		BatchSize:    4,
-		AgainOffset:  2,
-		HardOffset:   5,
+		BatchSize:   4,
+		AgainOffset: 2,
 	}
 
 	var buf bytes.Buffer
@@ -86,7 +83,6 @@ func TestTableFormatter(t *testing.T) {
 		"source: default",
 		"batch_size: 4",
 		"again_offset: 2",
-		"hard_offset: 5",
 	} {
 		if !strings.Contains(out, want) {
 			t.Fatalf("expected %q in config table, got: %s", want, out)

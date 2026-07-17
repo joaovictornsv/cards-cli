@@ -17,10 +17,8 @@ func TestInsertIndex(t *testing.T) {
 		wantErr   error
 	}{
 		{name: "again at offset 2", grade: GradeAgain, queueLen: 5, wantIndex: 2},
-		{name: "hard at offset 5", grade: GradeHard, queueLen: 6, wantIndex: 5},
 		{name: "easy at end", grade: GradeEasy, queueLen: 4, wantIndex: 4},
 		{name: "again clamps past end", grade: GradeAgain, queueLen: 1, wantIndex: 1},
-		{name: "hard clamps past end", grade: GradeHard, queueLen: 3, wantIndex: 3},
 		{name: "again on empty queue", grade: GradeAgain, queueLen: 0, wantIndex: 0},
 		{name: "easy on empty queue", grade: GradeEasy, queueLen: 0, wantIndex: 0},
 		{name: "invalid grade", grade: Grade("unknown"), queueLen: 3, wantErr: ErrInvalidGrade},
@@ -164,8 +162,8 @@ func TestGoldenWalkthrough(t *testing.T) {
 	}{
 		{card: "A", grade: GradeEasy, want: []string{"E", "F", "G", "H", "A"}},
 		{card: "B", grade: GradeAgain, want: []string{"E", "F", "B", "G", "H", "A"}},
-		{card: "C", grade: GradeHard, want: []string{"E", "F", "B", "G", "H", "C", "A"}},
-		{card: "D", grade: GradeEasy, want: []string{"E", "F", "B", "G", "H", "C", "A", "D"}},
+		{card: "C", grade: GradeAgain, want: []string{"E", "F", "C", "B", "G", "H", "A"}},
+		{card: "D", grade: GradeEasy, want: []string{"E", "F", "C", "B", "G", "H", "A", "D"}},
 	}
 
 	current := remaining
@@ -182,8 +180,8 @@ func TestGoldenWalkthrough(t *testing.T) {
 	}
 
 	nextBatch, _ := Pull(current, batchSize)
-	if !labelsEqual(nextBatch, labelByID, []string{"E", "F", "B", "G"}) {
-		t.Fatalf("next batch = %v, want [E F B G]", labelsFromIDs(nextBatch, labelByID))
+	if !labelsEqual(nextBatch, labelByID, []string{"E", "F", "C", "B"}) {
+		t.Fatalf("next batch = %v, want [E F C B]", labelsFromIDs(nextBatch, labelByID))
 	}
 }
 
