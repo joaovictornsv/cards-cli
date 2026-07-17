@@ -147,6 +147,8 @@ func parseGradeBytes(b []byte) (queue.Grade, bool, error) {
 			return queue.GradeAgain, true, nil
 		case '2':
 			return queue.GradeEasy, true, nil
+		case 'r', 'R':
+			return queue.GradeReplace, true, nil
 		case 'q':
 			return "", false, ErrQuit
 		}
@@ -169,6 +171,8 @@ func parseGradeLine(line string) (queue.Grade, error) {
 			return queue.GradeAgain, nil
 		case '2':
 			return queue.GradeEasy, nil
+		case 'r', 'R':
+			return queue.GradeReplace, nil
 		case 'q', 'Q':
 			return "", ErrQuit
 		}

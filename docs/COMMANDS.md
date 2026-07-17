@@ -59,10 +59,15 @@ cards add portuguese --front "What is saudade?" --back "A deep emotional state o
 
 ### `cards list <deck>`
 
-List cards in a deck (metadata: id, front text, timestamps). Does not walk the full queue order.
+List cards in a deck (metadata: id, front text, timestamps, `replace_eligible`). Does not walk the full queue order.
+
+| Flag | Description |
+| --- | --- |
+| `--replace-eligible` | List only cards flagged for content replacement |
 
 ```bash
 cards list portuguese --json
+cards list portuguese --replace-eligible --json
 ```
 
 ### `cards show <deck> <id>`
@@ -75,15 +80,17 @@ cards show portuguese 3 --json
 
 ### `cards edit <deck> <id>`
 
-Edit a card's front and/or back. At least one of `--front` or `--back` is required.
+Edit a card's front and/or back, or clear the `replace_eligible` flag. At least one of `--front`, `--back`, or `--replace-eligible` is required. Editing front/back does **not** clear `replace_eligible`.
 
 | Flag | Description |
 | --- | --- |
 | `--front` | New front text |
 | `--back` | New back text |
+| `--replace-eligible` | Set flag (`true` or `false`; use `--replace-eligible=false` to clear) |
 
 ```bash
 cards edit portuguese 3 --front "Updated question" --json
+cards edit portuguese 3 --replace-eligible=false --json
 ```
 
 ### `cards delete <deck> <id>`
@@ -104,7 +111,7 @@ cards queue portuguese --json
 
 ## `cards study <deck>`
 
-Run an **interactive** study session. One card at a time: show front → reveal back → grade (`again`, `easy`).
+Run an **interactive** study session. One card at a time: show front → reveal back → grade (`again`, `easy`, or `replace`).
 
 **Primary user:** human in the terminal (not AI agents).
 
@@ -119,11 +126,13 @@ Run an **interactive** study session. One card at a time: show front → reveal 
 | --- | --- |
 | `again` | Insert at front + `again_offset` (default 2) |
 | `easy` | Insert at end of queue |
+| `replace` | Same as `easy`; also sets `replace_eligible = true` on the card |
 
 **Interactive controls:**
 
 - Space/Enter — reveal back
 - Arrow keys or `1`/`2` — grade (again / easy)
+- `r` / `R` — replace (flag card for content refresh)
 - `q` — quit mid-session (graded cards saved; unreviewed batch cards stay at front)
 
 ```bash

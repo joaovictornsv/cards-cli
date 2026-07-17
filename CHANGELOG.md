@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Study `replace` grade (`r` / `R`) — same queue behavior as `easy`, sets persistent `replace_eligible` flag on the card
+- `replace_eligible` boolean column on cards (migration `003_replace_eligible.sql`)
+- `cards list <deck> --replace-eligible` filter for flagged cards
+- `cards edit <deck> <id> --replace-eligible=false` to clear the flag
+- `replace_eligible` field in `cards list`, `cards show`, and `cards edit` JSON output
+
 ## [0.1.1] - 2026-07-16
 
 ### Removed

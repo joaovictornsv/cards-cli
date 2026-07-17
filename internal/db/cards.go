@@ -12,7 +12,7 @@ import (
 var ErrCardNotFound = errors.New("card not found")
 
 const cardSelectBase = `
-	SELECT id, deck_id, front, back, created_at, updated_at
+	SELECT id, deck_id, front, back, created_at, updated_at, replace_eligible
 	FROM cards`
 
 func (r *Repository) CreateCard(ctx context.Context, deckName string, card models.Card) (models.Card, error) {
@@ -75,19 +75,22 @@ func (r *Repository) CreateCard(ctx context.Context, deckName string, card model
 	return r.GetCardByID(ctx, cardID)
 }
 
-func (r *Repository) ListCardsByDeck(ctx context.Context, deckName string) ([]models.CardSummary, error) {
+func (r *Repository) ListCardsByDeck(ctx context.Context, deckName string, replaceEligibleOnly bool) ([]models.CardSummary, error) {
 	deck, err := r.GetDeckByName(ctx, deckName)
 	if err != nil {
 		return nil, err
 	}
 
-	rows, err := r.db.sql.QueryContext(ctx, `
-		SELECT id, front, created_at, updated_at
+	query := `
+		SELECT id, front, created_at, updated_at, replace_eligible
 		FROM cards
-		WHERE deck_id = ?
-		ORDER BY id`,
-		deck.ID,
-	)
+		WHERE deck_id = ?`
+	if replaceEligibleOnly {
+		query += ` AND replace_eligible = 1`
+	}
+	query += ` ORDER BY id`
+
+	rows, err := r.db.sql.QueryContext(ctx, query, deck.ID)
 	if err != nil {
 		return nil, fmt.Errorf("list cards: %w", err)
 	}
@@ -96,7 +99,7 @@ func (r *Repository) ListCardsByDeck(ctx context.Context, deckName string) ([]mo
 	cards := make([]models.CardSummary, 0)
 	for rows.Next() {
 		var card models.CardSummary
-		if err := rows.Scan(&card.ID, &card.Front, &card.CreatedAt, &card.UpdatedAt); err != nil {
+		if err := rows.Scan(&card.ID, &card.Front, &card.CreatedAt, &card.UpdatedAt, &card.ReplaceEligible); err != nil {
 			return nil, err
 		}
 		cards = append(cards, card)
@@ -136,13 +139,13 @@ func (r *Repository) GetCardByDeckAndID(ctx context.Context, deckName string, ca
 	return card, nil
 }
 
-func (r *Repository) UpdateCard(ctx context.Context, deckName string, cardID int64, front, back *string) (models.Card, error) {
+func (r *Repository) UpdateCard(ctx context.Context, deckName string, cardID int64, front, back *string, replaceEligible *bool) (models.Card, error) {
 	card, err := r.GetCardByDeckAndID(ctx, deckName, cardID)
 	if err != nil {
 		return models.Card{}, err
 	}
 
-	if err := card.ValidateForUpdate(front, back); err != nil {
+	if err := card.ValidateForUpdate(front, back, replaceEligible); err != nil {
 		return models.Card{}, err
 	}
 
@@ -152,12 +155,15 @@ func (r *Repository) UpdateCard(ctx context.Context, deckName string, cardID int
 	if back != nil {
 		card.Back = *back
 	}
+	if replaceEligible != nil {
+		card.ReplaceEligible = *replaceEligible
+	}
 	card.UpdatedAt = models.NowTimestamp()
 
 	_, err = r.db.sql.ExecContext(ctx, `
-		UPDATE cards SET front = ?, back = ?, updated_at = ?
+		UPDATE cards SET front = ?, back = ?, updated_at = ?, replace_eligible = ?
 		WHERE id = ?`,
-		card.Front, card.Back, card.UpdatedAt, card.ID,
+		card.Front, card.Back, card.UpdatedAt, card.ReplaceEligible, card.ID,
 	)
 	if err != nil {
 		return models.Card{}, fmt.Errorf("update card: %w", err)
@@ -241,11 +247,28 @@ func shiftQueueForFrontInsert(ctx context.Context, tx *sql.Tx, deckID int64) err
 	return nil
 }
 
+func (r *Repository) SetReplaceEligible(ctx context.Context, deckName string, cardID int64, eligible bool) error {
+	card, err := r.GetCardByDeckAndID(ctx, deckName, cardID)
+	if err != nil {
+		return err
+	}
+
+	_, err = r.db.sql.ExecContext(ctx, `
+		UPDATE cards SET replace_eligible = ?, updated_at = ?
+		WHERE id = ?`,
+		eligible, models.NowTimestamp(), card.ID,
+	)
+	if err != nil {
+		return fmt.Errorf("set replace_eligible: %w", err)
+	}
+	return nil
+}
+
 func scanCard(row rowScanner) (models.Card, error) {
 	var card models.Card
 	if err := row.Scan(
 		&card.ID, &card.DeckID, &card.Front, &card.Back,
-		&card.CreatedAt, &card.UpdatedAt,
+		&card.CreatedAt, &card.UpdatedAt, &card.ReplaceEligible,
 	); err != nil {
 		return models.Card{}, err
 	}

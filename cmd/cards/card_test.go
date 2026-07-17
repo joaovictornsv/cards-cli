@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"database/sql"
 	"encoding/json"
 	"errors"
@@ -477,4 +478,92 @@ func TestDeleteCardNotFound(t *testing.T) {
 
 func formatInt(n int64) string {
 	return strconv.FormatInt(n, 10)
+}
+
+func TestListReplaceEligibleFilter(t *testing.T) {
+	dbPath, buf := testHarness(t)
+	rootCmd.SetArgs([]string{"deck", "create", "portuguese", "--json"})
+	if err := rootCmd.Execute(); err != nil {
+		t.Fatal(err)
+	}
+
+	cardID := addTestCard(t, buf)
+	buf.Reset()
+	rootCmd.SetArgs([]string{
+		"add", "portuguese",
+		"--front", "second card",
+		"--back", "second back",
+		"--json",
+	})
+	if err := rootCmd.Execute(); err != nil {
+		t.Fatal(err)
+	}
+
+	database, err := db.Open(dbPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer database.Close()
+	repo := db.NewRepository(database)
+	if err := repo.SetReplaceEligible(context.Background(), "portuguese", cardID, true); err != nil {
+		t.Fatal(err)
+	}
+
+	buf.Reset()
+	rootCmd.SetArgs([]string{"list", "portuguese", "--replace-eligible", "--json"})
+	if err := rootCmd.Execute(); err != nil {
+		t.Fatal(err)
+	}
+
+	var resp struct {
+		Cards []models.CardSummary `json:"cards"`
+		Total int                  `json:"total"`
+	}
+	if err := json.Unmarshal(buf.Bytes(), &resp); err != nil {
+		t.Fatalf("decode list JSON: %v\noutput: %s", err, buf.String())
+	}
+	if resp.Total != 1 || len(resp.Cards) != 1 {
+		t.Fatalf("expected 1 flagged card, got total=%d cards=%d", resp.Total, len(resp.Cards))
+	}
+	if resp.Cards[0].ID != cardID || !resp.Cards[0].ReplaceEligible {
+		t.Fatalf("expected flagged card %d, got %+v", cardID, resp.Cards[0])
+	}
+}
+
+func TestEditClearReplaceEligible(t *testing.T) {
+	dbPath, buf := testHarness(t)
+	rootCmd.SetArgs([]string{"deck", "create", "portuguese", "--json"})
+	if err := rootCmd.Execute(); err != nil {
+		t.Fatal(err)
+	}
+	cardID := addTestCard(t, buf)
+
+	database, err := db.Open(dbPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer database.Close()
+	repo := db.NewRepository(database)
+	if err := repo.SetReplaceEligible(context.Background(), "portuguese", cardID, true); err != nil {
+		t.Fatal(err)
+	}
+
+	resetCommandFlags(t)
+	buf.Reset()
+	rootCmd.SetArgs([]string{
+		"edit", "portuguese", formatInt(cardID),
+		"--replace-eligible=false",
+		"--json",
+	})
+	if err := rootCmd.Execute(); err != nil {
+		t.Fatal(err)
+	}
+
+	var card models.Card
+	if err := json.Unmarshal(buf.Bytes(), &card); err != nil {
+		t.Fatalf("decode card JSON: %v\noutput: %s", err, buf.String())
+	}
+	if card.ReplaceEligible {
+		t.Fatal("expected replace_eligible cleared")
+	}
 }

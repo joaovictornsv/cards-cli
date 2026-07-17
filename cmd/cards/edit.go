@@ -9,8 +9,9 @@ import (
 )
 
 var (
-	editFront string
-	editBack  string
+	editFront           string
+	editBack            string
+	editReplaceEligible bool
 )
 
 var editCmd = &cobra.Command{
@@ -31,12 +32,16 @@ var editCmd = &cobra.Command{
 		if cmd.Flags().Changed("back") {
 			back = &editBack
 		}
-		if front == nil && back == nil {
+		var replaceEligible *bool
+		if cmd.Flags().Changed("replace-eligible") {
+			replaceEligible = &editReplaceEligible
+		}
+		if front == nil && back == nil && replaceEligible == nil {
 			return models.ErrCardEditRequiresField
 		}
 
 		return runWithRepo(cmd.Context(), func(ctx context.Context, repo *db.Repository) error {
-			updated, err := repo.UpdateCard(ctx, deckName, cardID, front, back)
+			updated, err := repo.UpdateCard(ctx, deckName, cardID, front, back, replaceEligible)
 			if err != nil {
 				return handleRepoError(err)
 			}
@@ -48,5 +53,6 @@ var editCmd = &cobra.Command{
 func init() {
 	editCmd.Flags().StringVar(&editFront, "front", "", "New front text")
 	editCmd.Flags().StringVar(&editBack, "back", "", "New back text")
+	editCmd.Flags().BoolVar(&editReplaceEligible, "replace-eligible", false, "Set replace_eligible flag (use --replace-eligible=false to clear)")
 	rootCmd.AddCommand(editCmd)
 }

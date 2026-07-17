@@ -9,22 +9,24 @@ var ErrCardFrontRequired = errors.New("card front is required")
 
 var ErrCardBackRequired = errors.New("card back is required")
 
-var ErrCardEditRequiresField = errors.New("edit requires at least one of --front or --back")
+var ErrCardEditRequiresField = errors.New("edit requires at least one of --front, --back, or --replace-eligible")
 
 type Card struct {
-	ID        int64  `json:"id"`
-	DeckID    int64  `json:"deck_id"`
-	Front     string `json:"front"`
-	Back      string `json:"back"`
-	CreatedAt string `json:"created_at"`
-	UpdatedAt string `json:"updated_at"`
+	ID               int64  `json:"id"`
+	DeckID           int64  `json:"deck_id"`
+	Front            string `json:"front"`
+	Back             string `json:"back"`
+	CreatedAt        string `json:"created_at"`
+	UpdatedAt        string `json:"updated_at"`
+	ReplaceEligible  bool   `json:"replace_eligible"`
 }
 
 type CardSummary struct {
-	ID        int64  `json:"id"`
-	Front     string `json:"front"`
-	CreatedAt string `json:"created_at"`
-	UpdatedAt string `json:"updated_at"`
+	ID              int64  `json:"id"`
+	Front           string `json:"front"`
+	CreatedAt       string `json:"created_at"`
+	UpdatedAt       string `json:"updated_at"`
+	ReplaceEligible bool   `json:"replace_eligible"`
 }
 
 func (c *Card) NormalizeForCreate() {
@@ -45,8 +47,8 @@ func (c *Card) ValidateForCreate() error {
 
 // ValidateForUpdate trims and validates partial front/back updates.
 // At least one field must be provided; provided fields must be non-empty after trim.
-func (c *Card) ValidateForUpdate(front, back *string) error {
-	if front == nil && back == nil {
+func (c *Card) ValidateForUpdate(front, back *string, replaceEligible *bool) error {
+	if front == nil && back == nil && replaceEligible == nil {
 		return ErrCardEditRequiresField
 	}
 	if front != nil {

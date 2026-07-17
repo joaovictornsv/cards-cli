@@ -18,6 +18,7 @@ func TestInsertIndex(t *testing.T) {
 	}{
 		{name: "again at offset 2", grade: GradeAgain, queueLen: 5, wantIndex: 2},
 		{name: "easy at end", grade: GradeEasy, queueLen: 4, wantIndex: 4},
+		{name: "replace at end", grade: GradeReplace, queueLen: 4, wantIndex: 4},
 		{name: "again clamps past end", grade: GradeAgain, queueLen: 1, wantIndex: 1},
 		{name: "again on empty queue", grade: GradeAgain, queueLen: 0, wantIndex: 0},
 		{name: "easy on empty queue", grade: GradeEasy, queueLen: 0, wantIndex: 0},

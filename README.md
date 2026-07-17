@@ -16,12 +16,12 @@ cards study portuguese   # interactive — run yourself in the terminal
 | `deck list` | List decks with card counts | Available |
 | `deck delete` | Delete a deck and its cards | Available |
 | `add` | Add a card to a deck | Available |
-| `list` | List cards in a deck (metadata) | Available |
+| `list` | List cards in a deck (`--replace-eligible` filter) | Available |
 | `show` | Show one card | Available |
-| `edit` | Edit card front/back | Available |
+| `edit` | Edit card front/back or `replace_eligible` flag | Available |
 | `delete` | Remove a card from deck and queue | Available |
 | `queue` | Show current queue order | Available |
-| `study` | Interactive study session (`--limit`, `--json`) | Available — **user-run only** |
+| `study` | Interactive study session (`again` / `easy` / `replace`; `--limit`, `--json`) | Available — **user-run only** |
 | `config` | Show resolved configuration | Available |
 | `version` | Show CLI version and build metadata | Available |
 

@@ -236,6 +236,52 @@ func TestStudyJSONLog(t *testing.T) {
 	}
 }
 
+func TestStudyJSONLogReplaceGrade(t *testing.T) {
+	_, buf := testHarness(t)
+
+	oldJSON := jsonOutput
+	jsonOutput = true
+	t.Cleanup(func() { jsonOutput = oldJSON })
+
+	oldFactory := studyInputFactory
+	studyInputFactory = func(io.Reader) study.Input {
+		return study.NewScriptedInput([]queue.Grade{queue.GradeReplace})
+	}
+	t.Cleanup(func() { studyInputFactory = oldFactory })
+
+	rootCmd.SetArgs([]string{"deck", "create", "replacejson", "--json"})
+	if err := rootCmd.Execute(); err != nil {
+		t.Fatal(err)
+	}
+	rootCmd.SetArgs([]string{"add", "replacejson", "--front", "hello", "--back", "world", "--json"})
+	if err := rootCmd.Execute(); err != nil {
+		t.Fatal(err)
+	}
+
+	buf.Reset()
+	rootCmd.SetArgs([]string{"study", "replacejson", "--json"})
+	if err := rootCmd.Execute(); err != nil {
+		t.Fatal(err)
+	}
+
+	out := buf.String()
+	jsonStart := strings.Index(out, "{\n  \"deck\"")
+	if jsonStart < 0 {
+		t.Fatalf("expected JSON log in output, got:\n%s", out)
+	}
+
+	var result study.Result
+	if err := json.Unmarshal([]byte(out[jsonStart:]), &result); err != nil {
+		t.Fatalf("decode study JSON log: %v\njson: %s", err, out[jsonStart:])
+	}
+	if len(result.Reviews) != 1 {
+		t.Fatalf("reviews = %d, want 1", len(result.Reviews))
+	}
+	if result.Reviews[0].Grade != queue.GradeReplace {
+		t.Fatalf("grade = %q, want replace", result.Reviews[0].Grade)
+	}
+}
+
 func TestStudyInvalidLimit(t *testing.T) {
 	_, _ = testHarness(t)
 

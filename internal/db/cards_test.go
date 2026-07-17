@@ -136,7 +136,7 @@ func TestListCardsByDeck(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	cards, err := repo.ListCardsByDeck(ctx, "portuguese")
+	cards, err := repo.ListCardsByDeck(ctx, "portuguese", false)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -168,7 +168,7 @@ func TestListCardsByDeckEmpty(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	cards, err := repo.ListCardsByDeck(ctx, "portuguese")
+	cards, err := repo.ListCardsByDeck(ctx, "portuguese", false)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -188,7 +188,7 @@ func TestListCardsByDeckNotFound(t *testing.T) {
 	defer database.Close()
 
 	repo := NewRepository(database)
-	_, err = repo.ListCardsByDeck(context.Background(), "missing")
+	_, err = repo.ListCardsByDeck(context.Background(), "missing", false)
 	if !errors.Is(err, ErrDeckNotFound) {
 		t.Fatalf("expected ErrDeckNotFound, got %v", err)
 	}
@@ -301,7 +301,7 @@ func TestUpdateCardFrontOnly(t *testing.T) {
 	_, cards := setupDeckWithCards(t, repo, ctx)
 
 	front := "updated second"
-	updated, err := repo.UpdateCard(ctx, "portuguese", cards[1].ID, &front, nil)
+	updated, err := repo.UpdateCard(ctx, "portuguese", cards[1].ID, &front, nil, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -333,7 +333,7 @@ func TestUpdateCardBackOnly(t *testing.T) {
 	_, cards := setupDeckWithCards(t, repo, ctx)
 
 	back := "updated back"
-	updated, err := repo.UpdateCard(ctx, "portuguese", cards[0].ID, nil, &back)
+	updated, err := repo.UpdateCard(ctx, "portuguese", cards[0].ID, nil, &back, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -355,7 +355,7 @@ func TestUpdateCardBoth(t *testing.T) {
 
 	front := "new front"
 	back := "new back"
-	updated, err := repo.UpdateCard(ctx, "portuguese", cards[2].ID, &front, &back)
+	updated, err := repo.UpdateCard(ctx, "portuguese", cards[2].ID, &front, &back, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -376,7 +376,7 @@ func TestUpdateCardValidatesEmptyFront(t *testing.T) {
 	_, cards := setupDeckWithCards(t, repo, ctx)
 
 	front := "   "
-	_, err = repo.UpdateCard(ctx, "portuguese", cards[0].ID, &front, nil)
+	_, err = repo.UpdateCard(ctx, "portuguese", cards[0].ID, &front, nil, nil)
 	if !errors.Is(err, models.ErrCardFrontRequired) {
 		t.Fatalf("expected ErrCardFrontRequired, got %v", err)
 	}
@@ -394,7 +394,7 @@ func TestUpdateCardDuplicateFrontAllowed(t *testing.T) {
 	_, cards := setupDeckWithCards(t, repo, ctx)
 
 	front := "first"
-	updated, err := repo.UpdateCard(ctx, "portuguese", cards[1].ID, &front, nil)
+	updated, err := repo.UpdateCard(ctx, "portuguese", cards[1].ID, &front, nil, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -484,5 +484,109 @@ func TestDeleteCardNotFound(t *testing.T) {
 	_, err = repo.DeleteCard(ctx, "portuguese", 9999)
 	if !errors.Is(err, ErrCardNotFound) {
 		t.Fatalf("expected ErrCardNotFound, got %v", err)
+	}
+}
+
+func TestSetReplaceEligible(t *testing.T) {
+	database, err := OpenMemory()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer database.Close()
+
+	repo := NewRepository(database)
+	ctx := context.Background()
+	_, cards := setupDeckWithCards(t, repo, ctx)
+
+	if err := repo.SetReplaceEligible(ctx, "portuguese", cards[0].ID, true); err != nil {
+		t.Fatal(err)
+	}
+
+	got, err := repo.GetCardByDeckAndID(ctx, "portuguese", cards[0].ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !got.ReplaceEligible {
+		t.Fatal("expected replace_eligible true")
+	}
+}
+
+func TestListCardsByDeckReplaceEligibleFilter(t *testing.T) {
+	database, err := OpenMemory()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer database.Close()
+
+	repo := NewRepository(database)
+	ctx := context.Background()
+	_, cards := setupDeckWithCards(t, repo, ctx)
+
+	if err := repo.SetReplaceEligible(ctx, "portuguese", cards[1].ID, true); err != nil {
+		t.Fatal(err)
+	}
+
+	flagged, err := repo.ListCardsByDeck(ctx, "portuguese", true)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(flagged) != 1 || flagged[0].ID != cards[1].ID {
+		t.Fatalf("expected 1 flagged card id %d, got %+v", cards[1].ID, flagged)
+	}
+	if !flagged[0].ReplaceEligible {
+		t.Fatal("expected replace_eligible in summary")
+	}
+}
+
+func TestUpdateCardReplaceEligibleOnly(t *testing.T) {
+	database, err := OpenMemory()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer database.Close()
+
+	repo := NewRepository(database)
+	ctx := context.Background()
+	_, cards := setupDeckWithCards(t, repo, ctx)
+
+	if err := repo.SetReplaceEligible(ctx, "portuguese", cards[0].ID, true); err != nil {
+		t.Fatal(err)
+	}
+
+	eligible := false
+	updated, err := repo.UpdateCard(ctx, "portuguese", cards[0].ID, nil, nil, &eligible)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if updated.ReplaceEligible {
+		t.Fatal("expected replace_eligible cleared")
+	}
+	if updated.Front != "first" {
+		t.Fatalf("expected front unchanged, got %q", updated.Front)
+	}
+}
+
+func TestUpdateCardFrontPreservesReplaceEligible(t *testing.T) {
+	database, err := OpenMemory()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer database.Close()
+
+	repo := NewRepository(database)
+	ctx := context.Background()
+	_, cards := setupDeckWithCards(t, repo, ctx)
+
+	if err := repo.SetReplaceEligible(ctx, "portuguese", cards[0].ID, true); err != nil {
+		t.Fatal(err)
+	}
+
+	front := "updated first"
+	updated, err := repo.UpdateCard(ctx, "portuguese", cards[0].ID, &front, nil, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !updated.ReplaceEligible {
+		t.Fatal("expected replace_eligible preserved after front edit")
 	}
 }

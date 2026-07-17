@@ -67,7 +67,7 @@ func (s *Session) Run(ctx context.Context) (Result, error) {
 
 		fmt.Fprintf(s.Out, "[%d/%d] %s\n", i+1, limit, card.Front)
 		if i == 0 {
-			fmt.Fprintln(s.Out, "      (space/enter to reveal, 1/2 or arrows to grade, q to quit)")
+			fmt.Fprintln(s.Out, "      (space/enter to reveal, 1/2 or arrows to grade, r to flag for replace, q to quit)")
 		}
 		fmt.Fprintln(s.Out)
 
@@ -83,7 +83,7 @@ func (s *Session) Run(ctx context.Context) (Result, error) {
 		}
 
 		fmt.Fprintf(s.Out, "      %s\n\n", card.Back)
-		fmt.Fprintln(s.Out, "      [1] again   [2] easy")
+		fmt.Fprintln(s.Out, "      [1] again   [2] easy   [R] replace")
 
 		grade, err := s.Input.ReadGrade()
 		if err != nil {
@@ -101,6 +101,11 @@ func (s *Session) Run(ctx context.Context) (Result, error) {
 		tail, err = queue.ReinsertAfterGrade(tail, cardID, grade, s.Opts.QueueOpts)
 		if err != nil {
 			return Result{}, err
+		}
+		if grade == queue.GradeReplace {
+			if err := s.Store.SetReplaceEligible(ctx, s.DeckName, cardID); err != nil {
+				return Result{}, err
+			}
 		}
 		if err := s.persist(ctx, deck.ID, pending, tail); err != nil {
 			return Result{}, err

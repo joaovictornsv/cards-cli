@@ -23,7 +23,7 @@ Global config keys in `config.toml`:
 
 ## Study (user-run only)
 
-Agents do not run `cards study`. Grades affect queue position: `again` → front + `again_offset`, `easy` → end. If a user shares study output, session log JSON may include `deck`, `batch_size`, `reviews`, and `status` (`complete` or `quit`).
+Agents do not run `cards study`. Grades affect queue position: `again` → front + `again_offset`, `easy` → end, `replace` → end + sets `replace_eligible`. If a user shares study output, session log JSON may include `deck`, `batch_size`, `reviews`, and `status` (`complete` or `quit`).
 
 ## Commands (management)
 
@@ -33,9 +33,9 @@ Agents do not run `cards study`. Grades affect queue position: `again` → front
 | `deck list` | Available |
 | `deck delete <name>` | Available (`--yes` required with `--json`) |
 | `add <deck> --front --back` | Available |
-| `list <deck>` | Available |
+| `list <deck>` | Available (`--replace-eligible` filter) |
 | `show <deck> <id>` | Available |
-| `edit <deck> <id>` | Available |
+| `edit <deck> <id>` | Available (`--replace-eligible` to clear flag) |
 | `delete <deck> <id>` | Available |
 | `queue <deck>` | Available |
 | `study <deck>` | Available (user-run only; agents must not invoke) |
@@ -86,7 +86,8 @@ Agents do not run `cards study`. Grades affect queue position: `again` → front
   "front": "What is saudade?",
   "back": "A deep emotional state of longing.",
   "created_at": "2026-07-09T12:00:00Z",
-  "updated_at": "2026-07-09T12:00:00Z"
+  "updated_at": "2026-07-09T12:00:00Z",
+  "replace_eligible": false
 }
 ```
 
@@ -96,11 +97,13 @@ Agents do not run `cards study`. Grades affect queue position: `again` → front
 {
   "deck": "portuguese",
   "cards": [
-    { "id": 1, "front": "What is saudade?", "created_at": "...", "updated_at": "..." }
+    { "id": 1, "front": "What is saudade?", "created_at": "...", "updated_at": "...", "replace_eligible": false }
   ],
   "total": 1
 }
 ```
+
+Filter flagged cards: `cards list <deck> --replace-eligible --json` (same shape, only flagged cards).
 
 **Queue** (`cards queue <deck> --json`):
 
@@ -126,3 +129,11 @@ Agents do not run `cards study`. Grades affect queue position: `again` → front
   ]
 }
 ```
+
+`grade` may also be `"replace"` (same queue effect as `easy`, sets `replace_eligible` on the card).
+
+## Flagged cards workflow
+
+1. User flags cards during study with `r` (replace grade), or you inspect existing flags: `cards list <deck> --replace-eligible --json`
+2. Rewrite content: `cards edit <deck> <id> --front "..." --back "..." --json`
+3. Clear flag after refresh: `cards edit <deck> <id> --replace-eligible=false --json`

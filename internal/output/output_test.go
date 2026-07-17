@@ -160,18 +160,20 @@ func TestDeckFormatters(t *testing.T) {
 
 func TestCardFormatters(t *testing.T) {
 	card := models.Card{
-		ID:        1,
-		DeckID:    2,
-		Front:     "What is saudade?",
-		Back:      "A deep emotional state of longing.",
-		CreatedAt: "2026-07-09T12:00:00Z",
-		UpdatedAt: "2026-07-09T12:00:00Z",
+		ID:              1,
+		DeckID:          2,
+		Front:           "What is saudade?",
+		Back:            "A deep emotional state of longing.",
+		CreatedAt:       "2026-07-09T12:00:00Z",
+		UpdatedAt:       "2026-07-09T12:00:00Z",
+		ReplaceEligible: false,
 	}
 	summary := models.CardSummary{
-		ID:        1,
-		Front:     "What is saudade?",
-		CreatedAt: "2026-07-09T12:00:00Z",
-		UpdatedAt: "2026-07-09T12:00:00Z",
+		ID:              1,
+		Front:           "What is saudade?",
+		CreatedAt:       "2026-07-09T12:00:00Z",
+		UpdatedAt:       "2026-07-09T12:00:00Z",
+		ReplaceEligible: false,
 	}
 
 	var buf bytes.Buffer
@@ -186,6 +188,7 @@ func TestCardFormatters(t *testing.T) {
 		`"back": "A deep emotional state of longing."`,
 		`"created_at": "2026-07-09T12:00:00Z"`,
 		`"updated_at": "2026-07-09T12:00:00Z"`,
+		`"replace_eligible": false`,
 	} {
 		if !strings.Contains(buf.String(), want) {
 			t.Fatalf("expected %q in card json, got: %s", want, buf.String())
@@ -223,7 +226,7 @@ func TestCardFormatters(t *testing.T) {
 	if err := table.PrintCards(&buf, "portuguese", []models.CardSummary{summary}); err != nil {
 		t.Fatal(err)
 	}
-	for _, want := range []string{"deck: portuguese", "ID", "FRONT", "CREATED", "UPDATED", "What is saudade?"} {
+	for _, want := range []string{"deck: portuguese", "ID", "FRONT", "CREATED", "UPDATED", "REPLACE", "What is saudade?"} {
 		if !strings.Contains(buf.String(), want) {
 			t.Fatalf("expected %q in cards table, got: %s", want, buf.String())
 		}
@@ -239,6 +242,7 @@ func TestCardFormatters(t *testing.T) {
 		"back: A deep emotional state of longing.",
 		"created_at: 2026-07-09T12:00:00Z",
 		"updated_at: 2026-07-09T12:00:00Z",
+		"replace_eligible: false",
 	} {
 		if !strings.Contains(buf.String(), want) {
 			t.Fatalf("expected %q in card table, got: %s", want, buf.String())

@@ -18,8 +18,10 @@ Phrase → command. Always append `--json` for management operations. See [SKILL
 | --- | --- |
 | "Add a card to portuguese" | `cards add "portuguese" --front "..." --back "..." --json` |
 | "List cards in portuguese" | `cards list "portuguese" --json` |
+| "List cards flagged for replacement" | `cards list "portuguese" --replace-eligible --json` |
 | "Show card 3 in portuguese" | `cards show "portuguese" 3 --json` |
 | "Edit card 3 front text" | `cards edit "portuguese" 3 --front "new front" --json` |
+| "Clear replace flag on card 3" | `cards edit "portuguese" 3 --replace-eligible=false --json` |
 | "Delete card 3 from portuguese" | `cards delete "portuguese" 3 --json` |
 
 ## Queue

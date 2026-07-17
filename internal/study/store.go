@@ -15,6 +15,7 @@ type Store interface {
 	ListQueueCardIDs(ctx context.Context, deckName string) ([]int64, error)
 	GetCard(ctx context.Context, deckName string, cardID int64) (models.Card, error)
 	ReplaceQueue(ctx context.Context, deckID int64, cardIDs []int64) error
+	SetReplaceEligible(ctx context.Context, deckName string, cardID int64) error
 }
 
 type DBStore struct {
@@ -47,4 +48,8 @@ func (s DBStore) GetCard(ctx context.Context, deckName string, cardID int64) (mo
 
 func (s DBStore) ReplaceQueue(ctx context.Context, deckID int64, cardIDs []int64) error {
 	return s.repo.ReplaceDeckQueue(ctx, deckID, cardIDs)
+}
+
+func (s DBStore) SetReplaceEligible(ctx context.Context, deckName string, cardID int64) error {
+	return s.repo.SetReplaceEligible(ctx, deckName, cardID, true)
 }
