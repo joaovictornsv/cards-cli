@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `cards search` — find cards across decks by text (OR-matched `--term` flags or positional query; optional `--deck` filter)
+
 ## [0.1.3] - 2026-07-17
 
 ### Fixed

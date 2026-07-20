@@ -63,6 +63,23 @@ type cardsResponse struct {
 	Total int                  `json:"total"`
 }
 
+type searchResponse struct {
+	Cards []models.CardSearchResult `json:"cards"`
+	Total int                       `json:"total"`
+}
+
+func (JSONFormatter) PrintSearchResults(w io.Writer, results []models.CardSearchResult) error {
+	if results == nil {
+		results = []models.CardSearchResult{}
+	}
+	enc := json.NewEncoder(w)
+	enc.SetIndent("", "  ")
+	return enc.Encode(searchResponse{
+		Cards: results,
+		Total: len(results),
+	})
+}
+
 func (JSONFormatter) PrintCards(w io.Writer, deckName string, cards []models.CardSummary) error {
 	if cards == nil {
 		cards = []models.CardSummary{}

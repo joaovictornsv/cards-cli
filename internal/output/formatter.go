@@ -16,6 +16,7 @@ type Formatter interface {
 	PrintDecks(w io.Writer, decks []models.Deck) error
 	PrintCard(w io.Writer, card models.Card) error
 	PrintCards(w io.Writer, deckName string, cards []models.CardSummary) error
+	PrintSearchResults(w io.Writer, results []models.CardSearchResult) error
 	PrintQueue(w io.Writer, deckName string, entries []models.QueueEntry) error
 	PrintStudyLog(w io.Writer, result study.Result) error
 }

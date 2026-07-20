@@ -71,6 +71,37 @@ func (TableFormatter) PrintCards(w io.Writer, deckName string, cards []models.Ca
 	return printCardsTable(w, cards)
 }
 
+const searchPreviewMax = 50
+
+func truncateText(s string, max int) string {
+	if len(s) <= max {
+		return s
+	}
+	return s[:max-1] + "…"
+}
+
+func (TableFormatter) PrintSearchResults(w io.Writer, results []models.CardSearchResult) error {
+	return printSearchResultsTable(w, results)
+}
+
+func printSearchResultsTable(w io.Writer, results []models.CardSearchResult) error {
+	tw := tabwriter.NewWriter(w, 0, 0, 2, ' ', 0)
+	if _, err := fmt.Fprintln(tw, "DECK\tID\tFRONT\tBACK"); err != nil {
+		return err
+	}
+	for _, result := range results {
+		if _, err := fmt.Fprintf(tw, "%s\t%d\t%s\t%s\n",
+			result.Deck,
+			result.ID,
+			truncateText(result.Front, searchPreviewMax),
+			truncateText(result.Back, searchPreviewMax),
+		); err != nil {
+			return err
+		}
+	}
+	return tw.Flush()
+}
+
 func printCardsTable(w io.Writer, cards []models.CardSummary) error {
 	tw := tabwriter.NewWriter(w, 0, 0, 2, ' ', 0)
 	if _, err := fmt.Fprintln(tw, "ID\tFRONT\tCREATED\tUPDATED\tREPLACE"); err != nil {
