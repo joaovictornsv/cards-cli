@@ -29,6 +29,13 @@ type CardSummary struct {
 	ReplaceEligible bool   `json:"replace_eligible"`
 }
 
+type CardSearchResult struct {
+	ID    int64  `json:"id"`
+	Deck  string `json:"deck"`
+	Front string `json:"front"`
+	Back  string `json:"back"`
+}
+
 func (c *Card) NormalizeForCreate() {
 	c.Front = strings.TrimSpace(c.Front)
 	c.Back = strings.TrimSpace(c.Back)

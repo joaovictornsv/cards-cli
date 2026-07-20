@@ -36,12 +36,20 @@ func resetCommandFlags(t *testing.T) {
 	addBack = ""
 	editFront = ""
 	editBack = ""
+	searchTerms = nil
+	searchDeck = ""
 	resetCmdFlags(editCmd)
+	resetCmdFlags(searchCmd)
 	rootCmd.SetArgs(nil)
 }
 
 func resetCmdFlags(cmd *cobra.Command) {
 	cmd.Flags().VisitAll(func(f *pflag.Flag) {
+		if f.Value.Type() == "stringArray" || f.Value.Type() == "stringSlice" {
+			_ = f.Value.Set("")
+			f.Changed = false
+			return
+		}
 		_ = f.Value.Set(f.DefValue)
 		f.Changed = false
 	})

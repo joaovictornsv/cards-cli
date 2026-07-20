@@ -70,6 +70,21 @@ cards list portuguese --json
 cards list portuguese --replace-eligible --json
 ```
 
+### `cards search [query]`
+
+Search cards across all decks (or one deck with `--deck`). Matches card front, card back, and deck name (case-insensitive substring). Multiple `--term` flags are OR-matched; a positional query counts as one term.
+
+| Flag | Description |
+| --- | --- |
+| `--term` | Search term (repeatable; terms are OR-matched) |
+| `--deck` | Limit search to one deck |
+
+```bash
+cards search "saudade" --json
+cards search --term "hello" --term "saudade" --json
+cards search "hello" --deck portuguese --json
+```
+
 ### `cards show <deck> <id>`
 
 Show one card (full front and back).

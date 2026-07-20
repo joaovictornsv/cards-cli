@@ -250,6 +250,51 @@ func TestCardFormatters(t *testing.T) {
 	}
 }
 
+func TestSearchFormatters(t *testing.T) {
+	result := models.CardSearchResult{
+		ID:    1,
+		Deck:  "portuguese",
+		Front: "What is saudade?",
+		Back:  "A deep emotional state of longing.",
+	}
+
+	var buf bytes.Buffer
+	jsonFmt := JSONFormatter{}
+	if err := jsonFmt.PrintSearchResults(&buf, []models.CardSearchResult{result}); err != nil {
+		t.Fatal(err)
+	}
+	for _, want := range []string{
+		`"cards"`,
+		`"total": 1`,
+		`"deck": "portuguese"`,
+		`"front": "What is saudade?"`,
+		`"back": "A deep emotional state of longing."`,
+	} {
+		if !strings.Contains(buf.String(), want) {
+			t.Fatalf("expected %q in search json, got: %s", want, buf.String())
+		}
+	}
+
+	buf.Reset()
+	if err := jsonFmt.PrintSearchResults(&buf, nil); err != nil {
+		t.Fatal(err)
+	}
+	if strings.Contains(buf.String(), `"cards": null`) {
+		t.Fatalf("expected empty array, got: %s", buf.String())
+	}
+
+	buf.Reset()
+	table := TableFormatter{}
+	if err := table.PrintSearchResults(&buf, []models.CardSearchResult{result}); err != nil {
+		t.Fatal(err)
+	}
+	for _, want := range []string{"DECK", "ID", "FRONT", "BACK", "portuguese", "saudade"} {
+		if !strings.Contains(buf.String(), want) {
+			t.Fatalf("expected %q in search table, got: %s", want, buf.String())
+		}
+	}
+}
+
 func TestQueueFormatters(t *testing.T) {
 	entry := models.QueueEntry{
 		Position:     0,
