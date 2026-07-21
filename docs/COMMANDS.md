@@ -257,8 +257,3 @@ cards version
 cards version --json
 cards --version
 ```
-
-## See also
-
-- [PROJECT_DRAFT.md](PROJECT_DRAFT.md) — historical product spec and scheduling algorithm
-- [NEXT_STEPS.md](../NEXT_STEPS.md) — future ideas and out-of-scope items

@@ -72,7 +72,7 @@ Optional local pre-commit hooks (requires [lefthook](https://github.com/evilmart
 lefthook install
 ```
 
-Changes are tracked in [CHANGELOG.md](CHANGELOG.md). Future ideas: [NEXT_STEPS.md](NEXT_STEPS.md).
+Changes are tracked in [CHANGELOG.md](CHANGELOG.md).
 
 ## License
 
