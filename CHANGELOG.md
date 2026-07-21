@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.6] - 2026-07-21
+
 ### Added
 
 - `cards stats <deck>` — per-deck session count, last-session timestamp, and nudge when study is overdue (`nudge_threshold_days` config, default 3)
