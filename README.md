@@ -15,6 +15,7 @@ cards study portuguese   # interactive — run yourself in the terminal
 | `deck create` | Create a new deck | Available |
 | `deck list` | List decks with card counts | Available |
 | `deck delete` | Delete a deck and its cards | Available |
+| `deck shuffle` | Randomly reshuffle the deck queue order | Available |
 | `add` | Add a card to a deck | Available |
 | `list` | List cards in a deck (`--replace-eligible` filter) | Available |
 | `search` | Search cards across decks by text | Available |

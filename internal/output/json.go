@@ -138,3 +138,9 @@ func (JSONFormatter) PrintDeckStats(w io.Writer, stats models.DeckStats) error {
 	enc.SetIndent("", "  ")
 	return enc.Encode(stats)
 }
+
+func (JSONFormatter) PrintShuffleResult(w io.Writer, result models.ShuffleResult) error {
+	enc := json.NewEncoder(w)
+	enc.SetIndent("", "  ")
+	return enc.Encode(result)
+}

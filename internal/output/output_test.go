@@ -389,3 +389,41 @@ func TestDeckStatsFormatters(t *testing.T) {
 		}
 	}
 }
+
+func TestShuffleResultFormatters(t *testing.T) {
+	result := models.ShuffleResult{
+		Deck:      "portuguese",
+		CardCount: 12,
+		Status:    "shuffled",
+	}
+
+	var buf bytes.Buffer
+	jsonFmt := JSONFormatter{}
+	if err := jsonFmt.PrintShuffleResult(&buf, result); err != nil {
+		t.Fatal(err)
+	}
+	for _, want := range []string{
+		`"deck": "portuguese"`,
+		`"card_count": 12`,
+		`"status": "shuffled"`,
+	} {
+		if !strings.Contains(buf.String(), want) {
+			t.Fatalf("expected %q in shuffle json, got: %s", want, buf.String())
+		}
+	}
+
+	buf.Reset()
+	table := TableFormatter{}
+	if err := table.PrintShuffleResult(&buf, result); err != nil {
+		t.Fatal(err)
+	}
+	for _, want := range []string{
+		"deck: portuguese",
+		"cards: 12",
+		"status: shuffled",
+	} {
+		if !strings.Contains(buf.String(), want) {
+			t.Fatalf("expected %q in shuffle table, got: %s", want, buf.String())
+		}
+	}
+}

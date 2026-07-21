@@ -145,6 +145,12 @@ func (TableFormatter) PrintImportResult(w io.Writer, result importexport.ImportR
 	return err
 }
 
+func (TableFormatter) PrintShuffleResult(w io.Writer, result models.ShuffleResult) error {
+	_, err := fmt.Fprintf(w, "deck: %s\ncards: %d\nstatus: %s\n",
+		result.Deck, result.CardCount, result.Status)
+	return err
+}
+
 func (TableFormatter) PrintDeckStats(w io.Writer, stats models.DeckStats) error {
 	if _, err := fmt.Fprintf(w, "deck: %s\nsessions: %d\nlast session: %s\n",
 		stats.Deck, stats.SessionsCount, stats.LastSessionAgo); err != nil {

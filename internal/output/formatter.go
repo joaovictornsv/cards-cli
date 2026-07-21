@@ -23,6 +23,7 @@ type Formatter interface {
 	PrintExportSummary(w io.Writer, summary importexport.ExportSummary) error
 	PrintImportResult(w io.Writer, result importexport.ImportResult) error
 	PrintDeckStats(w io.Writer, stats models.DeckStats) error
+	PrintShuffleResult(w io.Writer, result models.ShuffleResult) error
 }
 
 func New(json bool) Formatter {

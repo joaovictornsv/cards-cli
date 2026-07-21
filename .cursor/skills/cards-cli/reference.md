@@ -33,6 +33,7 @@ Agents do not run `cards study`. Grades affect queue position: `again` → front
 | `deck create <name>` | Available |
 | `deck list` | Available |
 | `deck delete <name>` | Available (`--yes` required with `--json`) |
+| `deck shuffle <name>` | Available (`--yes` required with `--json`; noop for 0–1 cards) |
 | `add <deck> --front --back` | Available |
 | `list <deck>` | Available (`--replace-eligible` filter) |
 | `search [query]` | Available (`--term`, `--deck`) |
@@ -139,6 +140,18 @@ Flags: repeatable `--term` (OR-matched), optional positional query, optional `--
   ]
 }
 ```
+
+**Deck shuffle** (`cards deck shuffle <name> --json --yes`):
+
+```json
+{
+  "deck": "portuguese",
+  "card_count": 12,
+  "status": "shuffled"
+}
+```
+
+`status` is `"noop"` when the deck has 0–1 cards (queue unchanged).
 
 **Deck stats** (`cards stats <deck> --json`):
 

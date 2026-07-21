@@ -11,6 +11,7 @@ Phrase → command. Always append `--json` for management operations. See [SKILL
 | "Create a deck called portuguese" | `cards deck create "portuguese" --json` |
 | "List my decks" | `cards deck list --json` |
 | "Delete the portuguese deck" | `cards deck delete "portuguese" --json --yes` |
+| "Shuffle the portuguese deck queue" | `cards deck shuffle "portuguese" --json --yes` |
 
 ## Cards
 
