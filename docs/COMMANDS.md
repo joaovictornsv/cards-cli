@@ -217,7 +217,7 @@ Run an **interactive** study session. One card at a time: show front → reveal 
 - `r` / `R` — replace (flag card for content refresh)
 - `q` — quit mid-session (graded cards saved; unreviewed batch cards stay at front)
 
-**Session stats:** When the session ends (`complete`, or `quit` after at least one graded card), `sessions_count` increments and `last_session_at` is updated for the deck. See `cards stats`.
+**Session stats:** See `cards stats` for counting rules and nudge behavior.
 
 ```bash
 cards study portuguese
@@ -260,5 +260,5 @@ cards --version
 
 ## See also
 
-- [PROJECT_DRAFT.md](PROJECT_DRAFT.md) — full product spec and scheduling algorithm
-- [NEXT_STEPS.md](../NEXT_STEPS.md) — post-v1 features
+- [PROJECT_DRAFT.md](PROJECT_DRAFT.md) — historical product spec and scheduling algorithm
+- [NEXT_STEPS.md](../NEXT_STEPS.md) — future ideas and out-of-scope items

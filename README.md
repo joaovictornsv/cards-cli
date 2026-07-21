@@ -10,25 +10,25 @@ cards study portuguese   # interactive — run yourself in the terminal
 
 ## Commands
 
-| Command | Description | Status |
-| --- | --- | --- |
-| `deck create` | Create a new deck | Available |
-| `deck list` | List decks with card counts | Available |
-| `deck delete` | Delete a deck and its cards | Available |
-| `deck shuffle` | Randomly reshuffle the deck queue order | Available |
-| `add` | Add a card to a deck | Available |
-| `list` | List cards in a deck (`--replace-eligible` filter) | Available |
-| `search` | Search cards across decks by text | Available |
-| `show` | Show one card | Available |
-| `edit` | Edit card front/back or `replace_eligible` flag | Available |
-| `delete` | Remove a card from deck and queue | Available |
-| `queue` | Show current queue order | Available |
-| `stats` | Show deck study stats and session nudge | Available |
-| `study` | Interactive study session (`again` / `easy` / `replace`; `--limit`, `--json`) | Available — **user-run only** |
-| `config` | Show resolved configuration | Available |
-| `version` | Show CLI version and build metadata | Available |
-| `export` | Export a deck to JSON or CSV | Available |
-| `import` | Import cards from JSON or CSV | Available |
+| Command | Description |
+| --- | --- |
+| `deck create` | Create a new deck |
+| `deck list` | List decks with card counts |
+| `deck delete` | Delete a deck and its cards |
+| `deck shuffle` | Randomly reshuffle the deck queue order |
+| `add` | Add a card to a deck |
+| `list` | List cards in a deck (`--replace-eligible` filter) |
+| `search` | Search cards across decks by text |
+| `show` | Show one card |
+| `edit` | Edit card front/back or `replace_eligible` flag |
+| `delete` | Remove a card from deck and queue |
+| `queue` | Show current queue order |
+| `stats` | Show deck study stats and session nudge |
+| `study` | Interactive study session (`again` / `easy` / `replace`; `--limit`, `--json`) — **user-run only** |
+| `config` | Show resolved configuration |
+| `version` | Show CLI version and build metadata |
+| `export` | Export a deck to JSON or CSV |
+| `import` | Import cards from JSON or CSV |
 
 Use `--json` on management commands for scripting. Full flag reference: [docs/COMMANDS.md](docs/COMMANDS.md). For AI agents: [`.cursor/skills/cards-cli/SKILL.md`](.cursor/skills/cards-cli/SKILL.md).
 
@@ -72,7 +72,7 @@ Optional local pre-commit hooks (requires [lefthook](https://github.com/evilmart
 lefthook install
 ```
 
-Changes are tracked in [CHANGELOG.md](CHANGELOG.md). Post-v1 ideas: [NEXT_STEPS.md](NEXT_STEPS.md).
+Changes are tracked in [CHANGELOG.md](CHANGELOG.md). Future ideas: [NEXT_STEPS.md](NEXT_STEPS.md).
 
 ## License
 

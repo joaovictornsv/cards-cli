@@ -2,7 +2,7 @@
 
 > CLI flashcard app for terminal study sessions.  
 > Scheduling model: **queue-position based** (not date/time based like Anki).  
-> Status: **decisions settled** — ready for implementation.
+> **Historical spec** — for current CLI behavior, see [COMMANDS.md](COMMANDS.md).
 
 ---
 
@@ -170,7 +170,7 @@ Align with `books-cli` conventions:
 - Override via `CARDS_DB` env var
 - Single Go binary, no server
 
-Export/import JSON deferred to v1.1.
+Export/import JSON and CSV shipped in v0.1.5 (`cards export`, `cards import`).
 
 **No relationship to `books-cli`** — independent config paths and data; integration is a future nice-to-have only.
 
@@ -268,7 +268,7 @@ Mirror `books-cli` since it’s a proven pattern in this environment:
 
 | # | Topic | Clarification |
 |---|---|---|
-| U1 | Daily habit / nudges | **Deferred** — see [NEXT_STEPS.md](../NEXT_STEPS.md) for stats/nudge command |
+| U1 | Daily habit / nudges | **Shipped** — `cards stats <deck>` with session count and nudge |
 | U2 | Original “+5 / +2” wording | **Confirmed:** fewer positions forward = sooner review (`again` +2 sooner than `hard` +5) |
 | U3 | Archive on delete | **No** archive feature |
 | U4 | Duplicate cards | **Allow** duplicate front text |
@@ -316,7 +316,7 @@ Matches intent.
 - [x] **Default batch size:** 4 (global config, `--limit` override)
 - [x] **Mid-session quit:** save per card
 - [x] **Stale bump:** defer
-- [x] **Nudges:** deferred (see NEXT_STEPS.md)
+- [x] **Nudges:** `cards stats` (shipped v0.1.6)
 - [x] **Study UX:** interactive, arrows/numbers, user-run
 - [x] **Management:** AI-driven
 - [x] **Shuffle batch:** defer

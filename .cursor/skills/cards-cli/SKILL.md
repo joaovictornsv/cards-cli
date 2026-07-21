@@ -46,7 +46,6 @@ Always append `--json` for management commands.
 | `cards export "<deck>" --format json --json` | Export summary (use `--output` for file) |
 | `cards import --deck "<deck>" --format json --file path --json` | Import cards |
 | `cards config --json` | Resolved paths and study defaults |
-| `cards stats <deck>` | Available |
 | `cards version --json` | |
 
 ## Errors
