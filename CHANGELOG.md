@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Docs audit: remove duplicate SKILL entry, drop redundant "Available" status columns, remove `PROJECT_DRAFT.md` and `NEXT_STEPS.md`
+
 ## [0.1.7] - 2026-07-21
 
 ### Added

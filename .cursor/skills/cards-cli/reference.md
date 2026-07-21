@@ -28,25 +28,25 @@ Agents do not run `cards study`. Grades affect queue position: `again` → front
 
 ## Commands (management)
 
-| Command | Status |
+| Command | Notes |
 | --- | --- |
-| `deck create <name>` | Available |
-| `deck list` | Available |
-| `deck delete <name>` | Available (`--yes` required with `--json`) |
-| `deck shuffle <name>` | Available (`--yes` required with `--json`; noop for 0–1 cards) |
-| `add <deck> --front --back` | Available |
-| `list <deck>` | Available (`--replace-eligible` filter) |
-| `search [query]` | Available (`--term`, `--deck`) |
-| `show <deck> <id>` | Available |
-| `edit <deck> <id>` | Available (`--replace-eligible` to clear flag) |
-| `delete <deck> <id>` | Available |
-| `queue <deck>` | Available |
-| `stats <deck>` | Available |
-| `export <deck>` | Available (`--format`, `--output`) |
-| `import` | Available (`--deck`, `--format`, `--file`, `--append`) |
-| `study <deck>` | Available (user-run only; agents must not invoke) |
-| `config` | Available |
-| `version` | Available |
+| `deck create <name>` | |
+| `deck list` | |
+| `deck delete <name>` | `--yes` required with `--json` |
+| `deck shuffle <name>` | `--yes` required with `--json`; noop for 0–1 cards |
+| `add <deck> --front --back` | New cards go to front of queue |
+| `list <deck>` | `--replace-eligible` filter |
+| `search [query]` | `--term` (repeatable), `--deck` |
+| `show <deck> <id>` | |
+| `edit <deck> <id>` | `--replace-eligible=false` clears flag |
+| `delete <deck> <id>` | |
+| `queue <deck>` | |
+| `stats <deck>` | |
+| `export <deck>` | `--format`, `--output` |
+| `import` | `--deck`, `--format`, `--file`, `--append` |
+| `study <deck>` | User-run only — agents must not invoke |
+| `config` | |
+| `version` | |
 
 ## JSON shapes
 
