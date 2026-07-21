@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.7] - 2026-07-21
+
 ### Added
 
 - `cards deck shuffle <name>` — randomly reshuffle the entire deck queue order (`--yes` required with `--json`; no-op for decks with 0–1 cards)
