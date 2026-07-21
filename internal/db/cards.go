@@ -75,6 +75,39 @@ func (r *Repository) CreateCard(ctx context.Context, deckName string, card model
 	return r.GetCardByID(ctx, cardID)
 }
 
+func (r *Repository) ListCardsInQueueOrder(ctx context.Context, deckName string) ([]models.Card, error) {
+	deck, err := r.GetDeckByName(ctx, deckName)
+	if err != nil {
+		return nil, err
+	}
+
+	rows, err := r.db.sql.QueryContext(ctx, `
+		SELECT c.id, c.deck_id, c.front, c.back, c.created_at, c.updated_at, c.replace_eligible
+		FROM queue q
+		JOIN cards c ON c.id = q.card_id
+		WHERE q.deck_id = ?
+		ORDER BY q.position`,
+		deck.ID,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("list cards in queue order: %w", err)
+	}
+	defer rows.Close()
+
+	cards := make([]models.Card, 0)
+	for rows.Next() {
+		card, err := scanCard(rows)
+		if err != nil {
+			return nil, err
+		}
+		cards = append(cards, card)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return cards, nil
+}
+
 func (r *Repository) ListCardsByDeck(ctx context.Context, deckName string, replaceEligibleOnly bool) ([]models.CardSummary, error) {
 	deck, err := r.GetDeckByName(ctx, deckName)
 	if err != nil {

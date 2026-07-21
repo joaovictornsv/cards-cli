@@ -5,6 +5,7 @@ import (
 
 	"github.com/joaovictornsv/cards-cli/internal/buildinfo"
 	"github.com/joaovictornsv/cards-cli/internal/config"
+	"github.com/joaovictornsv/cards-cli/internal/importexport"
 	"github.com/joaovictornsv/cards-cli/internal/models"
 	"github.com/joaovictornsv/cards-cli/internal/study"
 )
@@ -19,6 +20,8 @@ type Formatter interface {
 	PrintSearchResults(w io.Writer, results []models.CardSearchResult) error
 	PrintQueue(w io.Writer, deckName string, entries []models.QueueEntry) error
 	PrintStudyLog(w io.Writer, result study.Result) error
+	PrintExportSummary(w io.Writer, summary importexport.ExportSummary) error
+	PrintImportResult(w io.Writer, result importexport.ImportResult) error
 }
 
 func New(json bool) Formatter {

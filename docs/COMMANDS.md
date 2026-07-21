@@ -116,6 +116,45 @@ Remove a card from the deck and queue. No archive.
 cards delete portuguese 3 --json
 ```
 
+### `cards export <deck>`
+
+Export a deck and all its cards in queue order.
+
+| Flag | Default | Description |
+| --- | --- | --- |
+| `--format` | `json` | Export format: `json` or `csv` |
+| `--output`, `-o` | stdout | Write export payload to file instead of stdout |
+| `--json` | off | Print summary (`deck`, `format`, `card_count`, `output`) instead of mixing payload with summary |
+
+**JSON format:** `{ "deck": "...", "cards": [{ "front": "...", "back": "...", "id": 1 }] }` — `id` is optional metadata for round-trip reference.
+
+**CSV format:** header `front,back`, one card per line. Deck name is the positional `<deck>` argument.
+
+```bash
+cards export portuguese --format json
+cards export portuguese --format csv -o portuguese.csv
+cards export portuguese --format json -o portuguese.json --json
+```
+
+### `cards import`
+
+Import cards from a JSON or CSV file. Creates the deck if it does not exist. Without `--append`, fails if the deck already exists.
+
+| Flag | Required | Default | Description |
+| --- | --- | --- | --- |
+| `--deck` | yes | | Target deck name |
+| `--format` | no | `json` | Import format: `json` or `csv` |
+| `--file`, `-f` | yes | | Input file path (`-` for stdin) |
+| `--append` | no | off | Add cards to an existing deck |
+| `--json` | no | off | Summary output: `deck`, `cards_imported`, `errors` |
+
+Imported cards are inserted at the **front** of the queue (same as `cards add`). Duplicate fronts are allowed.
+
+```bash
+cards import --deck portuguese --format json --file portuguese.json --json
+cards import --deck portuguese --format csv --file portuguese.csv --append --json
+```
+
 ## `cards queue <deck>`
 
 Show current queue order (position, card id, front preview).

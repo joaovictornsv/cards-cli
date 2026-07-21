@@ -39,6 +39,8 @@ Agents do not run `cards study`. Grades affect queue position: `again` → front
 | `edit <deck> <id>` | Available (`--replace-eligible` to clear flag) |
 | `delete <deck> <id>` | Available |
 | `queue <deck>` | Available |
+| `export <deck>` | Available (`--format`, `--output`) |
+| `import` | Available (`--deck`, `--format`, `--file`, `--append`) |
 | `study <deck>` | Available (user-run only; agents must not invoke) |
 | `config` | Available |
 | `version` | Available |
@@ -150,6 +152,27 @@ Flags: repeatable `--term` (OR-matched), optional positional query, optional `--
 ```
 
 `grade` may also be `"replace"` (same queue effect as `easy`, sets `replace_eligible` on the card).
+
+**Export summary** (`cards export <deck> --json` with `--output`):
+
+```json
+{
+  "deck": "portuguese",
+  "format": "json",
+  "card_count": 42,
+  "output": "/path/to/portuguese.json"
+}
+```
+
+**Import result** (`cards import --deck <name> --file <path> --json`):
+
+```json
+{
+  "deck": "portuguese",
+  "cards_imported": 10,
+  "errors": ["row 3: card back is required"]
+}
+```
 
 ## Flagged cards workflow
 

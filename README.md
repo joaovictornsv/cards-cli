@@ -25,6 +25,8 @@ cards study portuguese   # interactive — run yourself in the terminal
 | `study` | Interactive study session (`again` / `easy` / `replace`; `--limit`, `--json`) | Available — **user-run only** |
 | `config` | Show resolved configuration | Available |
 | `version` | Show CLI version and build metadata | Available |
+| `export` | Export a deck to JSON or CSV | Available |
+| `import` | Import cards from JSON or CSV | Available |
 
 Use `--json` on management commands for scripting. Full flag reference: [docs/COMMANDS.md](docs/COMMANDS.md). For AI agents: [`.cursor/skills/cards-cli/SKILL.md`](.cursor/skills/cards-cli/SKILL.md).
 

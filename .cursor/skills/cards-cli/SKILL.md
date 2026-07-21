@@ -2,7 +2,7 @@
 name: cards-cli
 description: >-
   Manage flashcard decks and cards via the cards CLI (deck create/list/delete,
-  add, list, search, show, edit, delete, queue, config). Use when the user
+  add, list, search, show, edit, delete, queue, export, import, config). Use when the user
   mentions flashcards, decks, cards, study queue, spaced repetition queue,
   or cards-cli. Do NOT use for interactive study sessions — those are user-run.
 ---
@@ -41,6 +41,8 @@ Always append `--json` for management commands.
 | `cards edit "<deck>" <id> [--front "..."] [--back "..."] --json` | At least one of `--front` / `--back` |
 | `cards delete "<deck>" <id> --json` | |
 | `cards queue "<deck>" --json` | Queue order inspection |
+| `cards export "<deck>" --format json --json` | Export summary (use `--output` for file) |
+| `cards import --deck "<deck>" --format json --file path --json` | Import cards |
 | `cards config --json` | Resolved paths and study defaults |
 | `cards version --json` | |
 

@@ -32,6 +32,15 @@ Phrase → command. Always append `--json` for management operations. See [SKILL
 | --- | --- |
 | "Show the queue for portuguese" | `cards queue "portuguese" --json` |
 
+## Import / export
+
+| User says | Command |
+| --- | --- |
+| "Export portuguese deck to JSON" | `cards export "portuguese" --format json` |
+| "Export portuguese to a CSV file" | `cards export "portuguese" --format csv -o portuguese.csv` |
+| "Import cards from portuguese.json" | `cards import --deck "portuguese" --format json --file portuguese.json --json` |
+| "Append cards from CSV to portuguese" | `cards import --deck "portuguese" --format csv --file cards.csv --append --json` |
+
 ## Config
 
 | User says | Command |
