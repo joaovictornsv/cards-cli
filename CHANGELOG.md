@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `cards stats <deck>` — per-deck session count, last-session timestamp, and nudge when study is overdue (`nudge_threshold_days` config, default 3)
+- Deck-level `sessions_count` and `last_session_at` updated when a study session completes or is quit after at least one review (migration `004_deck_stats.sql`)
+
 ## [0.1.5] - 2026-07-21
 
 ### Added

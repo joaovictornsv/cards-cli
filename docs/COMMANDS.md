@@ -163,6 +163,21 @@ Show current queue order (position, card id, front preview).
 cards queue portuguese --json
 ```
 
+## `cards stats <deck>`
+
+Show per-deck study activity: session count, last session time, and an optional nudge when the deck has not been studied recently.
+
+```bash
+cards stats portuguese
+cards stats portuguese --json
+```
+
+**JSON fields:** `deck`, `sessions_count`, `last_session_at` (RFC3339 or `null`), `last_session_ago` (e.g. `never`, `today`, `3 days ago`), `nudge` (empty when no nudge).
+
+**Nudge threshold:** `nudge_threshold_days` in config (default `3`). A nudge appears when the deck was never studied or the last session is older than the threshold.
+
+**Session counting:** Stats increment when a study session ends with status `complete`, or `quit` after at least one card was graded. Quitting before grading any card does not count as a session.
+
 ## `cards study <deck>`
 
 Run an **interactive** study session. One card at a time: show front → reveal back → grade (`again`, `easy`, or `replace`).
@@ -188,6 +203,8 @@ Run an **interactive** study session. One card at a time: show front → reveal 
 - Arrow keys or `1`/`2` — grade (again / easy)
 - `r` / `R` — replace (flag card for content refresh)
 - `q` — quit mid-session (graded cards saved; unreviewed batch cards stay at front)
+
+**Session stats:** When the session ends (`complete`, or `quit` after at least one graded card), `sessions_count` increments and `last_session_at` is updated for the deck. See `cards stats`.
 
 ```bash
 cards study portuguese
@@ -216,6 +233,7 @@ cards config --json
 | `database` | (see above) | SQLite database path |
 | `batch_size` | `4` | Default study batch size |
 | `again_offset` | `2` | Queue offset for `again` grade |
+| `nudge_threshold_days` | `3` | Days without study before `cards stats` shows a nudge |
 
 ## `cards version`
 
@@ -230,4 +248,4 @@ cards --version
 ## See also
 
 - [PROJECT_DRAFT.md](PROJECT_DRAFT.md) — full product spec and scheduling algorithm
-- [NEXT_STEPS.md](../NEXT_STEPS.md) — post-v1 features (including deferred stats)
+- [NEXT_STEPS.md](../NEXT_STEPS.md) — post-v1 features

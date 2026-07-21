@@ -20,6 +20,7 @@ Global config keys in `config.toml`:
 | --- | --- | --- |
 | `batch_size` | `4` | Default study session batch size |
 | `again_offset` | `2` | Queue re-insert offset for `again` grade |
+| `nudge_threshold_days` | `3` | Days without study before `cards stats` shows a nudge |
 
 ## Study (user-run only)
 
@@ -39,6 +40,7 @@ Agents do not run `cards study`. Grades affect queue position: `again` → front
 | `edit <deck> <id>` | Available (`--replace-eligible` to clear flag) |
 | `delete <deck> <id>` | Available |
 | `queue <deck>` | Available |
+| `stats <deck>` | Available |
 | `export <deck>` | Available (`--format`, `--output`) |
 | `import` | Available (`--deck`, `--format`, `--file`, `--append`) |
 | `study <deck>` | Available (user-run only; agents must not invoke) |
@@ -56,7 +58,8 @@ Agents do not run `cards study`. Grades affect queue position: `again` → front
   "config_exists": false,
   "source": "default",
   "batch_size": 4,
-  "again_offset": 2
+  "again_offset": 2,
+  "nudge_threshold_days": 3
 }
 ```
 
@@ -136,6 +139,20 @@ Flags: repeatable `--term` (OR-matched), optional positional query, optional `--
   ]
 }
 ```
+
+**Deck stats** (`cards stats <deck> --json`):
+
+```json
+{
+  "deck": "portuguese",
+  "sessions_count": 5,
+  "last_session_at": "2026-07-18T12:00:00Z",
+  "last_session_ago": "3 days ago",
+  "nudge": "last session: 3 days ago — ready for a quick review?"
+}
+```
+
+`last_session_at` is `null` when never studied. `nudge` is empty when no nudge applies.
 
 **Study session log** (user-run; JSON printed after interactive output):
 

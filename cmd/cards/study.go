@@ -8,6 +8,7 @@ import (
 
 	"github.com/joaovictornsv/cards-cli/internal/config"
 	"github.com/joaovictornsv/cards-cli/internal/db"
+	"github.com/joaovictornsv/cards-cli/internal/models"
 	"github.com/joaovictornsv/cards-cli/internal/queue"
 	"github.com/joaovictornsv/cards-cli/internal/study"
 	"github.com/spf13/cobra"
@@ -81,6 +82,12 @@ func runStudyWithRepo(ctx context.Context, repo *db.Repository, deckName string,
 		return err
 	}
 
+	if shouldRecordSession(result) {
+		if err := repo.RecordDeckSessionByName(ctx, deckName, models.NowTimestamp()); err != nil {
+			return err
+		}
+	}
+
 	if jsonOutput {
 		fmt.Fprintln(out)
 		if err := formatter().PrintStudyLog(out, result); err != nil {
@@ -89,6 +96,16 @@ func runStudyWithRepo(ctx context.Context, repo *db.Repository, deckName string,
 	}
 
 	return nil
+}
+
+func shouldRecordSession(result study.Result) bool {
+	if result.Status == "complete" {
+		return true
+	}
+	if result.Status == "quit" && len(result.Reviews) > 0 {
+		return true
+	}
+	return false
 }
 
 func init() {

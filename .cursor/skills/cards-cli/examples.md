@@ -31,6 +31,7 @@ Phrase → command. Always append `--json` for management operations. See [SKILL
 | User says | Command |
 | --- | --- |
 | "Show the queue for portuguese" | `cards queue "portuguese" --json` |
+| "How often have I studied portuguese?" | `cards stats "portuguese" --json` |
 
 ## Import / export
 

@@ -52,6 +52,23 @@ func TestMigrationReplaceEligibleColumn(t *testing.T) {
 	}
 }
 
+func TestMigrationDeckStatsColumns(t *testing.T) {
+	database, err := OpenMemory()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer database.Close()
+
+	for _, col := range []string{"sessions_count", "last_session_at"} {
+		var name string
+		err = database.SQL().QueryRow(`
+			SELECT name FROM pragma_table_info('decks') WHERE name = ?`, col).Scan(&name)
+		if err != nil {
+			t.Fatalf("%s column: %v", col, err)
+		}
+	}
+}
+
 func TestOpenCreatesParentDir(t *testing.T) {
 	dir := t.TempDir()
 	path := filepath.Join(dir, "nested", "cards.db")
