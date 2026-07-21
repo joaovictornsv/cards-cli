@@ -41,9 +41,11 @@ Always append `--json` for management commands.
 | `cards edit "<deck>" <id> [--front "..."] [--back "..."] --json` | At least one of `--front` / `--back` |
 | `cards delete "<deck>" <id> --json` | |
 | `cards queue "<deck>" --json` | Queue order inspection |
+| `cards stats "<deck>" --json` | Deck session count, last session, nudge |
 | `cards export "<deck>" --format json --json` | Export summary (use `--output` for file) |
 | `cards import --deck "<deck>" --format json --file path --json` | Import cards |
 | `cards config --json` | Resolved paths and study defaults |
+| `cards stats <deck>` | Available |
 | `cards version --json` | |
 
 ## Errors

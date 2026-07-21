@@ -22,6 +22,7 @@ cards study portuguese   # interactive — run yourself in the terminal
 | `edit` | Edit card front/back or `replace_eligible` flag | Available |
 | `delete` | Remove a card from deck and queue | Available |
 | `queue` | Show current queue order | Available |
+| `stats` | Show deck study stats and session nudge | Available |
 | `study` | Interactive study session (`again` / `easy` / `replace`; `--limit`, `--json`) | Available — **user-run only** |
 | `config` | Show resolved configuration | Available |
 | `version` | Show CLI version and build metadata | Available |
@@ -52,6 +53,7 @@ Pre-built binaries for linux/amd64 will be available on [GitHub Releases](https:
 database = "/home/user/cards.db"
 batch_size = 4
 again_offset = 2
+nudge_threshold_days = 3
 ```
 
 Run `cards config` to see which path is in use.

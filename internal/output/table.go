@@ -25,9 +25,9 @@ func (TableFormatter) PrintVersion(w io.Writer, info buildinfo.Info) error {
 
 func PrintConfigHuman(w io.Writer, cfg config.Config) error {
 	_, err := fmt.Fprintf(w,
-		"database_path: %s\nconfig_path: %s\nconfig_exists: %t\nsource: %s\nbatch_size: %d\nagain_offset: %d\n",
+		"database_path: %s\nconfig_path: %s\nconfig_exists: %t\nsource: %s\nbatch_size: %d\nagain_offset: %d\nnudge_threshold_days: %d\n",
 		cfg.DatabasePath, cfg.ConfigPath, cfg.ConfigExists, cfg.Source,
-		cfg.BatchSize, cfg.AgainOffset)
+		cfg.BatchSize, cfg.AgainOffset, cfg.NudgeThresholdDays)
 	return err
 }
 
@@ -143,6 +143,23 @@ func (TableFormatter) PrintImportResult(w io.Writer, result importexport.ImportR
 		_, err = fmt.Fprintf(w, "errors:\n%s\n", strings.Join(result.Errors, "\n"))
 	}
 	return err
+}
+
+func (TableFormatter) PrintDeckStats(w io.Writer, stats models.DeckStats) error {
+	if _, err := fmt.Fprintf(w, "deck: %s\nsessions: %d\nlast session: %s\n",
+		stats.Deck, stats.SessionsCount, stats.LastSessionAgo); err != nil {
+		return err
+	}
+	if stats.LastSessionAt != nil && *stats.LastSessionAt != "" {
+		if _, err := fmt.Fprintf(w, "last session at: %s\n", *stats.LastSessionAt); err != nil {
+			return err
+		}
+	}
+	if stats.Nudge != "" {
+		_, err := fmt.Fprintf(w, "nudge: %s\n", stats.Nudge)
+		return err
+	}
+	return nil
 }
 
 func printQueueTable(w io.Writer, entries []models.QueueEntry) error {

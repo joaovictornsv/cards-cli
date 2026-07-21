@@ -31,6 +31,10 @@ func testHarness(t *testing.T) (string, *bytes.Buffer) {
 func resetCommandFlags(t *testing.T) {
 	t.Helper()
 	jsonOutput = false
+	if f := rootCmd.PersistentFlags().Lookup("json"); f != nil {
+		_ = f.Value.Set("false")
+		f.Changed = false
+	}
 	deckDeleteYes = false
 	addFront = ""
 	addBack = ""

@@ -16,8 +16,9 @@ func TestJSONFormatter(t *testing.T) {
 		ConfigPath:   "/home/user/.config/cards/config.toml",
 		ConfigExists: false,
 		Source:       config.SourceDefault,
-		BatchSize:   4,
-		AgainOffset: 2,
+		BatchSize:          4,
+		AgainOffset:        2,
+		NudgeThresholdDays: 3,
 	}
 
 	var buf bytes.Buffer
@@ -33,6 +34,7 @@ func TestJSONFormatter(t *testing.T) {
 		`"source": "default"`,
 		`"batch_size": 4`,
 		`"again_offset": 2`,
+		`"nudge_threshold_days": 3`,
 	} {
 		if !strings.Contains(out, want) {
 			t.Fatalf("expected %q in config json, got: %s", want, out)
@@ -66,8 +68,9 @@ func TestTableFormatter(t *testing.T) {
 		ConfigPath:   "/home/user/.config/cards/config.toml",
 		ConfigExists: false,
 		Source:       config.SourceDefault,
-		BatchSize:   4,
-		AgainOffset: 2,
+		BatchSize:          4,
+		AgainOffset:        2,
+		NudgeThresholdDays: 3,
 	}
 
 	var buf bytes.Buffer
@@ -83,6 +86,7 @@ func TestTableFormatter(t *testing.T) {
 		"source: default",
 		"batch_size: 4",
 		"again_offset: 2",
+		"nudge_threshold_days: 3",
 	} {
 		if !strings.Contains(out, want) {
 			t.Fatalf("expected %q in config table, got: %s", want, out)
@@ -338,6 +342,50 @@ func TestQueueFormatters(t *testing.T) {
 	for _, want := range []string{"deck: portuguese", "POSITION", "ID", "FRONT", "What is saudade?"} {
 		if !strings.Contains(buf.String(), want) {
 			t.Fatalf("expected %q in queue table, got: %s", want, buf.String())
+		}
+	}
+}
+
+func TestDeckStatsFormatters(t *testing.T) {
+	last := "2026-07-18T12:00:00Z"
+	stats := models.DeckStats{
+		Deck:           "portuguese",
+		SessionsCount:  5,
+		LastSessionAt:  &last,
+		LastSessionAgo: "3 days ago",
+		Nudge:          "last session: 3 days ago — ready for a quick review?",
+	}
+
+	var buf bytes.Buffer
+	jsonFmt := JSONFormatter{}
+	if err := jsonFmt.PrintDeckStats(&buf, stats); err != nil {
+		t.Fatal(err)
+	}
+	for _, want := range []string{
+		`"deck": "portuguese"`,
+		`"sessions_count": 5`,
+		`"last_session_at": "2026-07-18T12:00:00Z"`,
+		`"last_session_ago": "3 days ago"`,
+		`"nudge": "last session: 3 days ago — ready for a quick review?"`,
+	} {
+		if !strings.Contains(buf.String(), want) {
+			t.Fatalf("expected %q in stats json, got: %s", want, buf.String())
+		}
+	}
+
+	buf.Reset()
+	table := TableFormatter{}
+	if err := table.PrintDeckStats(&buf, stats); err != nil {
+		t.Fatal(err)
+	}
+	for _, want := range []string{
+		"deck: portuguese",
+		"sessions: 5",
+		"last session: 3 days ago",
+		"nudge: last session: 3 days ago — ready for a quick review?",
+	} {
+		if !strings.Contains(buf.String(), want) {
+			t.Fatalf("expected %q in stats table, got: %s", want, buf.String())
 		}
 	}
 }

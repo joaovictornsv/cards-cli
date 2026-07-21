@@ -22,6 +22,7 @@ type Formatter interface {
 	PrintStudyLog(w io.Writer, result study.Result) error
 	PrintExportSummary(w io.Writer, summary importexport.ExportSummary) error
 	PrintImportResult(w io.Writer, result importexport.ImportResult) error
+	PrintDeckStats(w io.Writer, stats models.DeckStats) error
 }
 
 func New(json bool) Formatter {

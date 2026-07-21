@@ -76,4 +76,7 @@ func TestResolveDefaults(t *testing.T) {
 	if cfg.AgainOffset != 2 {
 		t.Fatalf("got again_offset %d, want 2", cfg.AgainOffset)
 	}
+	if cfg.NudgeThresholdDays != 3 {
+		t.Fatalf("got nudge_threshold_days %d, want 3", cfg.NudgeThresholdDays)
+	}
 }

@@ -13,8 +13,9 @@ const (
 	configDirName = "cards"
 	configFile    = "config.toml"
 
-	defaultBatchSize   = 4
-	defaultAgainOffset = 2
+	defaultBatchSize          = 4
+	defaultAgainOffset        = 2
+	defaultNudgeThresholdDays = 3
 )
 
 type Source string
@@ -30,14 +31,16 @@ type Config struct {
 	ConfigPath   string
 	ConfigExists bool
 	Source       Source
-	BatchSize   int
-	AgainOffset int
+	BatchSize          int
+	AgainOffset        int
+	NudgeThresholdDays int
 }
 
 type fileConfig struct {
 	Database    string `toml:"database"`
-	BatchSize   int    `toml:"batch_size"`
-	AgainOffset int    `toml:"again_offset"`
+	BatchSize          int `toml:"batch_size"`
+	AgainOffset        int `toml:"again_offset"`
+	NudgeThresholdDays int `toml:"nudge_threshold_days"`
 }
 
 func Resolve() (Config, error) {
@@ -63,37 +66,44 @@ func Resolve() (Config, error) {
 	if fc.AgainOffset > 0 {
 		againOffset = fc.AgainOffset
 	}
+	nudgeThresholdDays := defaultNudgeThresholdDays
+	if fc.NudgeThresholdDays > 0 {
+		nudgeThresholdDays = fc.NudgeThresholdDays
+	}
 
 	if v := os.Getenv(envDatabase); v != "" {
 		return Config{
-			DatabasePath: v,
-			ConfigPath:   cfgPath,
-			ConfigExists: configExists,
-			Source:       SourceEnv,
-			BatchSize:    batchSize,
-			AgainOffset:  againOffset,
+			DatabasePath:       v,
+			ConfigPath:         cfgPath,
+			ConfigExists:       configExists,
+			Source:             SourceEnv,
+			BatchSize:          batchSize,
+			AgainOffset:        againOffset,
+			NudgeThresholdDays: nudgeThresholdDays,
 		}, nil
 	}
 
 	if fc.Database != "" {
 		return Config{
-			DatabasePath: fc.Database,
-			ConfigPath:   cfgPath,
-			ConfigExists: configExists,
-			Source:       SourceConfigFile,
-			BatchSize:    batchSize,
-			AgainOffset:  againOffset,
+			DatabasePath:       fc.Database,
+			ConfigPath:         cfgPath,
+			ConfigExists:       configExists,
+			Source:             SourceConfigFile,
+			BatchSize:          batchSize,
+			AgainOffset:        againOffset,
+			NudgeThresholdDays: nudgeThresholdDays,
 		}, nil
 	}
 
 	defaultPath := filepath.Join(home, ".local", "share", configDirName, "cards.db")
 	return Config{
-		DatabasePath: defaultPath,
-		ConfigPath:   cfgPath,
-		ConfigExists: configExists,
-		Source:       SourceDefault,
-		BatchSize:    batchSize,
-		AgainOffset:  againOffset,
+		DatabasePath:       defaultPath,
+		ConfigPath:         cfgPath,
+		ConfigExists:       configExists,
+		Source:             SourceDefault,
+		BatchSize:          batchSize,
+		AgainOffset:        againOffset,
+		NudgeThresholdDays: nudgeThresholdDays,
 	}, nil
 }
 

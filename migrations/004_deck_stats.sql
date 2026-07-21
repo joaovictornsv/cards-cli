@@ -1,0 +1,2 @@
+ALTER TABLE decks ADD COLUMN sessions_count INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE decks ADD COLUMN last_session_at TEXT;

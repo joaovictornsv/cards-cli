@@ -21,6 +21,7 @@ func (JSONFormatter) PrintConfig(w io.Writer, cfg config.Config) error {
 		"source":        cfg.Source,
 		"batch_size":   cfg.BatchSize,
 		"again_offset": cfg.AgainOffset,
+		"nudge_threshold_days": cfg.NudgeThresholdDays,
 	}
 	enc := json.NewEncoder(w)
 	enc.SetIndent("", "  ")
@@ -130,4 +131,10 @@ func (JSONFormatter) PrintImportResult(w io.Writer, result importexport.ImportRe
 	enc := json.NewEncoder(w)
 	enc.SetIndent("", "  ")
 	return enc.Encode(result)
+}
+
+func (JSONFormatter) PrintDeckStats(w io.Writer, stats models.DeckStats) error {
+	enc := json.NewEncoder(w)
+	enc.SetIndent("", "  ")
+	return enc.Encode(stats)
 }
