@@ -3,6 +3,7 @@ package db
 import (
 	"context"
 	"errors"
+	"math/rand"
 	"testing"
 
 	"github.com/joaovictornsv/cards-cli/internal/models"
@@ -211,4 +212,177 @@ func TestReplaceDeckQueueEmpty(t *testing.T) {
 	if len(ids) != 0 {
 		t.Fatalf("expected empty queue, got %v", ids)
 	}
+}
+
+func TestShuffleDeckQueueNoop(t *testing.T) {
+	database, err := OpenMemory()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer database.Close()
+
+	repo := NewRepository(database)
+	ctx := context.Background()
+	rng := rand.New(rand.NewSource(42))
+
+	if _, err := repo.CreateDeck(ctx, models.Deck{Name: "empty"}); err != nil {
+		t.Fatal(err)
+	}
+
+	result, err := repo.ShuffleDeckQueue(ctx, "empty", rng)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if result.Status != "noop" || result.CardCount != 0 {
+		t.Fatalf("expected noop with 0 cards, got %+v", result)
+	}
+
+	deck, err := repo.CreateDeck(ctx, models.Deck{Name: "single"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := repo.CreateCard(ctx, deck.Name, models.Card{Front: "one", Back: "uno"}); err != nil {
+		t.Fatal(err)
+	}
+
+	result, err = repo.ShuffleDeckQueue(ctx, "single", rng)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if result.Status != "noop" || result.CardCount != 1 {
+		t.Fatalf("expected noop with 1 card, got %+v", result)
+	}
+}
+
+func TestShuffleDeckQueueChangesOrder(t *testing.T) {
+	database, err := OpenMemory()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer database.Close()
+
+	repo := NewRepository(database)
+	ctx := context.Background()
+	_, cards := setupDeckWithCards(t, repo, ctx)
+
+	before, err := repo.ListQueueCardIDsByDeck(ctx, "portuguese")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	rng := rand.New(rand.NewSource(42))
+	result, err := repo.ShuffleDeckQueue(ctx, "portuguese", rng)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if result.Status != "shuffled" || result.CardCount != 3 {
+		t.Fatalf("expected shuffled with 3 cards, got %+v", result)
+	}
+
+	after, err := repo.ListQueueCardIDsByDeck(ctx, "portuguese")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if slicesEqual(before, after) {
+		t.Fatalf("expected order to change, got %v", after)
+	}
+	if !isPermutation(before, after) {
+		t.Fatalf("expected permutation of %v, got %v", before, after)
+	}
+
+	_ = cards
+}
+
+func TestShuffleDeckQueueSeededDeterministic(t *testing.T) {
+	database, err := OpenMemory()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer database.Close()
+
+	repo := NewRepository(database)
+	ctx := context.Background()
+	setupDeckWithCards(t, repo, ctx)
+
+	original, err := repo.ListQueueCardIDsByDeck(ctx, "portuguese")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	rng1 := rand.New(rand.NewSource(99))
+	if _, err := repo.ShuffleDeckQueue(ctx, "portuguese", rng1); err != nil {
+		t.Fatal(err)
+	}
+	first, err := repo.ListQueueCardIDsByDeck(ctx, "portuguese")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	deck, err := repo.GetDeckByName(ctx, "portuguese")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := repo.ReplaceDeckQueue(ctx, deck.ID, original); err != nil {
+		t.Fatal(err)
+	}
+
+	rng2 := rand.New(rand.NewSource(99))
+	if _, err := repo.ShuffleDeckQueue(ctx, "portuguese", rng2); err != nil {
+		t.Fatal(err)
+	}
+	second, err := repo.ListQueueCardIDsByDeck(ctx, "portuguese")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if !slicesEqual(first, second) {
+		t.Fatalf("expected same order with same seed, got %v vs %v", first, second)
+	}
+}
+
+func TestShuffleDeckQueueNotFound(t *testing.T) {
+	database, err := OpenMemory()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer database.Close()
+
+	repo := NewRepository(database)
+	ctx := context.Background()
+	rng := rand.New(rand.NewSource(1))
+
+	_, err = repo.ShuffleDeckQueue(ctx, "missing", rng)
+	if !errors.Is(err, ErrDeckNotFound) {
+		t.Fatalf("expected ErrDeckNotFound, got %v", err)
+	}
+}
+
+func slicesEqual(a, b []int64) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for i := range a {
+		if a[i] != b[i] {
+			return false
+		}
+	}
+	return true
+}
+
+func isPermutation(a, b []int64) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	counts := make(map[int64]int, len(a))
+	for _, id := range a {
+		counts[id]++
+	}
+	for _, id := range b {
+		counts[id]--
+		if counts[id] < 0 {
+			return false
+		}
+	}
+	return true
 }

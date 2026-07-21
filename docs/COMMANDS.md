@@ -42,6 +42,19 @@ Delete a deck and all its cards and queue entries.
 cards deck delete portuguese --json --yes
 ```
 
+### `cards deck shuffle <name>`
+
+Randomly permute all card positions in the deck queue. Same cards remain in the deck; only order changes. Decks with 0–1 cards are a no-op (`status: "noop"`).
+
+| Flag | Description |
+| --- | --- |
+| `--yes`, `-y` | Confirm shuffle without prompting (required with `--json`) |
+| `--seed` | Deterministic shuffle seed (hidden; for testing) |
+
+```bash
+cards deck shuffle portuguese --json --yes
+```
+
 ## Card commands
 
 ### `cards add <deck> --front "..." --back "..."`

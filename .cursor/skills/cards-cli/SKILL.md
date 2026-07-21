@@ -34,6 +34,7 @@ Always append `--json` for management commands.
 | `cards deck create "<name>" --json` | |
 | `cards deck list --json` | |
 | `cards deck delete "<name>" --json --yes` | `--yes` required with `--json` |
+| `cards deck shuffle "<name>" --json --yes` | Reshuffle queue order; `--yes` required with `--json` |
 | `cards add "<deck>" --front "..." --back "..." --json` | New cards go to front of queue |
 | `cards list "<deck>" --json` | Metadata only, not queue order |
 | `cards search "<query>" [--term "..."] [--deck "<deck>"] --json` | OR-matched terms across front, back, deck name |

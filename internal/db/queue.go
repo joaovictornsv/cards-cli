@@ -3,6 +3,7 @@ package db
 import (
 	"context"
 	"fmt"
+	"math/rand"
 
 	"github.com/joaovictornsv/cards-cli/internal/models"
 )
@@ -101,4 +102,37 @@ func (r *Repository) ListQueueByDeck(ctx context.Context, deckName string) ([]mo
 	}
 
 	return entries, nil
+}
+
+func (r *Repository) ShuffleDeckQueue(ctx context.Context, deckName string, rng *rand.Rand) (models.ShuffleResult, error) {
+	deck, err := r.GetDeckByName(ctx, deckName)
+	if err != nil {
+		return models.ShuffleResult{}, err
+	}
+
+	ids, err := r.ListQueueCardIDsByDeck(ctx, deckName)
+	if err != nil {
+		return models.ShuffleResult{}, err
+	}
+
+	result := models.ShuffleResult{
+		Deck:      deck.Name,
+		CardCount: len(ids),
+	}
+
+	if len(ids) <= 1 {
+		result.Status = "noop"
+		return result, nil
+	}
+
+	rng.Shuffle(len(ids), func(i, j int) {
+		ids[i], ids[j] = ids[j], ids[i]
+	})
+
+	if err := r.ReplaceDeckQueue(ctx, deck.ID, ids); err != nil {
+		return models.ShuffleResult{}, err
+	}
+
+	result.Status = "shuffled"
+	return result, nil
 }

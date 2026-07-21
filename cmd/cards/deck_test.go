@@ -36,6 +36,9 @@ func resetCommandFlags(t *testing.T) {
 		f.Changed = false
 	}
 	deckDeleteYes = false
+	deckShuffleYes = false
+	deckShuffleSeed = 0
+	deckShuffleHasSeed = false
 	addFront = ""
 	addBack = ""
 	editFront = ""

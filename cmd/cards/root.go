@@ -50,7 +50,8 @@ func formatter() output.Formatter {
 var (
 	errDeckNotFound      = errors.New("deck not found")
 	errDeckAlreadyExists = errors.New("deck already exists")
-	errDeleteRequiresYes = errors.New("delete requires --yes when using --json")
+	errDeleteRequiresYes  = errors.New("delete requires --yes when using --json")
+	errShuffleRequiresYes = errors.New("shuffle requires --yes when using --json")
 	errCardNotFound      = errors.New("card not found")
 	errInvalidCardID     = errors.New("invalid card id")
 )
