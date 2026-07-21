@@ -6,6 +6,7 @@ import (
 
 	"github.com/joaovictornsv/cards-cli/internal/buildinfo"
 	"github.com/joaovictornsv/cards-cli/internal/config"
+	"github.com/joaovictornsv/cards-cli/internal/importexport"
 	"github.com/joaovictornsv/cards-cli/internal/models"
 	"github.com/joaovictornsv/cards-cli/internal/study"
 )
@@ -114,6 +115,18 @@ func (JSONFormatter) PrintStudyLog(w io.Writer, result study.Result) error {
 	if result.Reviews == nil {
 		result.Reviews = []study.Review{}
 	}
+	enc := json.NewEncoder(w)
+	enc.SetIndent("", "  ")
+	return enc.Encode(result)
+}
+
+func (JSONFormatter) PrintExportSummary(w io.Writer, summary importexport.ExportSummary) error {
+	enc := json.NewEncoder(w)
+	enc.SetIndent("", "  ")
+	return enc.Encode(summary)
+}
+
+func (JSONFormatter) PrintImportResult(w io.Writer, result importexport.ImportResult) error {
 	enc := json.NewEncoder(w)
 	enc.SetIndent("", "  ")
 	return enc.Encode(result)

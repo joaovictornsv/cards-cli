@@ -3,10 +3,12 @@ package output
 import (
 	"fmt"
 	"io"
+	"strings"
 	"text/tabwriter"
 
 	"github.com/joaovictornsv/cards-cli/internal/buildinfo"
 	"github.com/joaovictornsv/cards-cli/internal/config"
+	"github.com/joaovictornsv/cards-cli/internal/importexport"
 	"github.com/joaovictornsv/cards-cli/internal/models"
 	"github.com/joaovictornsv/cards-cli/internal/study"
 )
@@ -125,6 +127,22 @@ func (TableFormatter) PrintQueue(w io.Writer, deckName string, entries []models.
 
 func (TableFormatter) PrintStudyLog(w io.Writer, result study.Result) error {
 	return nil
+}
+
+func (TableFormatter) PrintExportSummary(w io.Writer, summary importexport.ExportSummary) error {
+	_, err := fmt.Fprintf(w, "exported %d cards from %s (%s)\n", summary.CardCount, summary.Deck, summary.Format)
+	return err
+}
+
+func (TableFormatter) PrintImportResult(w io.Writer, result importexport.ImportResult) error {
+	_, err := fmt.Fprintf(w, "imported %d cards into %s\n", result.CardsImported, result.Deck)
+	if err != nil {
+		return err
+	}
+	if len(result.Errors) > 0 {
+		_, err = fmt.Fprintf(w, "errors:\n%s\n", strings.Join(result.Errors, "\n"))
+	}
+	return err
 }
 
 func printQueueTable(w io.Writer, entries []models.QueueEntry) error {

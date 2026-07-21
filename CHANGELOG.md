@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `cards export <deck>` — export deck cards to JSON or CSV (`--format`, `--output`; `--json` prints summary)
+- `cards import` — import cards from JSON or CSV (`--deck`, `--format`, `--file`; `--append` for existing decks)
+
 ## [0.1.4] - 2026-07-20
 
 ### Added

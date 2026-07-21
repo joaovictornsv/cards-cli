@@ -38,8 +38,16 @@ func resetCommandFlags(t *testing.T) {
 	editBack = ""
 	searchTerms = nil
 	searchDeck = ""
+	exportFormat = "json"
+	exportOutput = ""
+	importDeck = ""
+	importFormat = "json"
+	importFile = ""
+	importAppend = false
 	resetCmdFlags(editCmd)
 	resetCmdFlags(searchCmd)
+	resetCmdFlags(exportCmd)
+	resetCmdFlags(importCmd)
 	rootCmd.SetArgs(nil)
 }
 
